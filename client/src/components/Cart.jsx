@@ -42,8 +42,7 @@ function Cart({
     const customerPhone = document.getElementById("customerPhone").value
     const customerAddress = document.getElementById("customerAddress").value
     const paymentMethod = document.getElementById("paymentMethod").value
-    const deliveryFee =
-      Number(document.getElementById("deliveryFee").value) || 0
+    const deliveryFee = 0
     const observation = document.getElementById("observation").value
     const isAdult = document.getElementById("isAdult").checked
 
@@ -116,8 +115,8 @@ ${customerAddress}
 💳 Pagamento:
 ${paymentMethod}
 
-🚚 Taxa:
-R$ ${deliveryFee}
+🚚 Taxa de entrega:
+A verificar conforme localidade
 
 📝 Observação:
 ${observation || "Sem observação"}
@@ -275,14 +274,15 @@ R$ ${finalTotal}
               <option>Cartão</option>
             </select>
 
-            <input
-              id="deliveryFee"
-              type="number"
-              placeholder="Taxa de entrega"
-              onKeyDown={handleEnter}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4"
-            />
+            <div className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-zinc-300">
+  <span className="block text-sm text-zinc-500 mb-1">
+    Taxa de entrega
+  </span>
 
+  <strong className="text-white">
+    A verificar conforme localidade
+  </strong>
+</div>
             <textarea
               id="observation"
               placeholder="Observações"
