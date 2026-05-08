@@ -60,9 +60,9 @@ function ProductCard({
 
         <div className="flex items-center justify-between mt-8">
           <div>
-            <span className="text-4xl font-black text-amber-400">
-              R$ {product.price}
-            </span>
+            <span className="text-3xl sm:text-4xl font-black text-amber-400 tracking-tight whitespace-nowrap">
+  R$ {Number(product.price).toFixed(2).replace(".", ",")}
+</span>
           </div>
 
           <button
@@ -70,7 +70,7 @@ function ProductCard({
               addToCart(product)
             }
             disabled={isOutOfStock}
-            className={`px-6 py-4 rounded-2xl font-bold transition-all duration-300 ${
+            className={`min-w-[120px] px-5 py-4 rounded-2xl font-bold transition-all duration-300 ${
               isOutOfStock
                 ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                 : "bg-amber-500 hover:bg-amber-600 text-black hover:scale-105"
