@@ -6,6 +6,7 @@ const products = [
     name: "Jack Daniels",
     category: "Whisky",
     price: 129,
+    stock: 3,
     image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b",
   },
   {
@@ -13,6 +14,7 @@ const products = [
     name: "Heineken",
     category: "Cerveja",
     price: 12,
+    stock: 5,
     image: "https://images.unsplash.com/photo-1608270586620-248524c67de9",
   },
   {
@@ -20,6 +22,7 @@ const products = [
     name: "Chivas Regal",
     category: "Whisky",
     price: 189,
+    stock: 1,
     image: "https://images.unsplash.com/photo-1569529465841-dfecdab7503b",
   },
 ]
@@ -31,20 +34,25 @@ function App() {
   const [address, setAddress] = useState("")
 
   function addToCart(product) {
-    const productInCart = cart.find((item) => item.id === product.id)
+  const productInCart = cart.find((item) => item.id === product.id)
 
-    if (productInCart) {
-      setCart(
-        cart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      )
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }])
-    }
+  if (productInCart && productInCart.quantity >= product.stock) {
+    alert(`Estoque máximo disponível para ${product.name}: ${product.stock}`)
+    return
   }
+
+  if (productInCart) {
+    setCart(
+      cart.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    )
+  } else {
+    setCart([...cart, { ...product, quantity: 1 }])
+  }
+}
 
   function getNextOrderNumber() {
     const currentMonth = new Date().getMonth()
@@ -248,9 +256,9 @@ R$ ${total}
                   {product.category}
                 </span>
 
-                <h4 className="text-2xl font-bold mt-2">
-                  {product.name}
-                </h4>
+                <p className="text-zinc-400 text-sm mt-2">
+  Estoque: {product.stock} unidades
+</p>
 
                 <div className="flex items-center justify-between mt-6">
                   <span className="text-3xl font-black text-amber-400">
@@ -258,11 +266,22 @@ R$ ${total}
                   </span>
 
                   <button
-                    onClick={() => addToCart(product)}
-                    className="bg-amber-500 hover:bg-amber-600 px-5 py-3 rounded-xl font-bold transition"
-                  >
+  onClick={() => addToCart(product)}
+  disabled={
+    cart.find((item) => item.id === product.id)?.quantity >= product.stock
+  }
+  className={`px-5 py-3 rounded-xl font-bold transition ${
+    cart.find((item) => item.id === product.id)?.quantity >= product.stock
+      ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+      : "bg-amber-500 hover:bg-amber-600"
+  }`}
+>
+  {cart.find((item) => item.id === product.id)?.quantity >= product.stock
+    ? "Limite"
+    : "Adicionar"}
+</button>
                     Adicionar
-                  </button>
+                  
                 </div>
               </div>
             </div>
