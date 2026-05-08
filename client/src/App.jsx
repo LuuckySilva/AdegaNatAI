@@ -476,29 +476,30 @@ R$ ${total}
       />
 
       <Cart
-        cart={cart}
-        productsTotal={productsTotal}
-        deliveryFee={deliveryFee}
-        setDeliveryFee={setDeliveryFee}
-        total={total}
-        customerName={customerName}
-        setCustomerName={setCustomerName}
-        phone={phone}
-        setPhone={setPhone}
-        address={address}
-        setAddress={setAddress}
-        paymentMethod={paymentMethod}
-        setPaymentMethod={setPaymentMethod}
-        observation={observation}
-        setObservation={setObservation}
-        isAdult={isAdult}
-        setIsAdult={setIsAdult}
-        addToCart={addToCart}
-        setCart={setCart}
-        sendWhatsApp={sendWhatsApp}
-        isCartOpen={isCartOpen}
-        setIsCartOpen={setIsCartOpen}
-      />
+  cart={cart}
+  productsTotal={productsTotal}
+  deliveryFee={deliveryFee}
+  setDeliveryFee={setDeliveryFee}
+  total={total}
+  customerName={customerName}
+  setCustomerName={setCustomerName}
+  phone={phone}
+  setPhone={setPhone}
+  address={address}
+  setAddress={setAddress}
+  paymentMethod={paymentMethod}
+  setPaymentMethod={setPaymentMethod}
+  observation={observation}
+  setObservation={setObservation}
+  isAdult={isAdult}
+  setIsAdult={setIsAdult}
+  addToCart={addToCart}
+  setCart={setCart}
+  sendWhatsApp={sendWhatsApp}
+  isCartOpen={isCartOpen}
+  setIsCartOpen={setIsCartOpen}
+  openCart={() => setIsCartOpen(true)}
+/>
     </div>
   )
 }
