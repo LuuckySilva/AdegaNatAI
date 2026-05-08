@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-
+import StoreInfo from "./components/StoreInfo"
 import Header from "./components/Header"
 import Hero from "./components/Hero"
 import ProductCard from "./components/ProductCard"
@@ -414,6 +414,7 @@ R$ ${total}
       />
 
       <Hero />
+      <StoreInfo />
 
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="flex flex-col gap-6 mb-12">
