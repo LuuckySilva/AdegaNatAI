@@ -27,6 +27,7 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [customerName, setCustomerName] = useState("")
   const [address, setAddress] = useState("")
+  const [isAdult, setIsAdult] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
   const [savedOrders, setSavedOrders] = useState(getSavedOrders())
   const [selectedCategory, setSelectedCategory] = useState("Todos")
@@ -150,9 +151,7 @@ function App() {
     const productInCart = cart.find((item) => item.id === product.id)
 
     if (productInCart && productInCart.quantity >= product.stock) {
-      alert(
-        `Estoque máximo disponível para ${product.name}: ${product.stock}`
-      )
+      alert(`Estoque máximo disponível para ${product.name}: ${product.stock}`)
       return
     }
 
@@ -175,6 +174,11 @@ function App() {
       return
     }
 
+    if (!isAdult) {
+      alert("Confirme que o cliente tem 18 anos ou mais para continuar.")
+      return
+    }
+
     const orderNumber = getNextOrderNumber()
 
     const itemsMessage = cart
@@ -194,6 +198,9 @@ function App() {
 👤 Cliente:
 ${customerName}
 
+🔞 Maior de idade:
+Sim, cliente confirmou ser maior de 18 anos.
+
 📍 Endereço:
 ${address}
 
@@ -208,6 +215,7 @@ R$ ${total}
       number: orderNumber,
       customerName,
       address,
+      isAdult,
       items: cart,
       total,
       date: new Date().toISOString(),
@@ -240,6 +248,7 @@ R$ ${total}
     setCart([])
     setCustomerName("")
     setAddress("")
+    setIsAdult(false)
     setIsCartOpen(false)
   }
 
@@ -308,6 +317,8 @@ R$ ${total}
         setCustomerName={setCustomerName}
         address={address}
         setAddress={setAddress}
+        isAdult={isAdult}
+        setIsAdult={setIsAdult}
         addToCart={addToCart}
         setCart={setCart}
         sendWhatsApp={sendWhatsApp}

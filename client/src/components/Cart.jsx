@@ -5,6 +5,8 @@ function Cart({
   setCustomerName,
   address,
   setAddress,
+  isAdult,
+  setIsAdult,
   addToCart,
   setCart,
   sendWhatsApp,
@@ -44,9 +46,7 @@ function Cart({
             type="text"
             placeholder="Nome do cliente"
             value={customerName}
-            onChange={(e) =>
-              setCustomerName(e.target.value)
-            }
+            onChange={(e) => setCustomerName(e.target.value)}
             className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
           />
 
@@ -54,11 +54,22 @@ function Cart({
             type="text"
             placeholder="Endereço completo"
             value={address}
-            onChange={(e) =>
-              setAddress(e.target.value)
-            }
+            onChange={(e) => setAddress(e.target.value)}
             className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
           />
+
+          <label className="flex items-start gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              checked={isAdult}
+              onChange={(e) => setIsAdult(e.target.checked)}
+              className="mt-1"
+            />
+
+            <span>
+              Confirmo que o cliente tem 18 anos ou mais.
+            </span>
+          </label>
         </div>
 
         <div className="space-y-3 max-h-60 overflow-auto">
@@ -86,15 +97,11 @@ function Cart({
                           product.id === item.id
                             ? {
                                 ...product,
-                                quantity:
-                                  product.quantity - 1,
+                                quantity: product.quantity - 1,
                               }
                             : product
                         )
-                        .filter(
-                          (product) =>
-                            product.quantity > 0
-                        )
+                        .filter((product) => product.quantity > 0)
                     )
                   }
                   className="bg-zinc-700 hover:bg-zinc-600 px-3 py-1 rounded-lg text-sm"
@@ -112,10 +119,7 @@ function Cart({
                 <button
                   onClick={() =>
                     setCart(
-                      cart.filter(
-                        (product) =>
-                          product.id !== item.id
-                      )
+                      cart.filter((product) => product.id !== item.id)
                     )
                   }
                   className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm"
