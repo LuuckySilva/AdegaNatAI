@@ -128,21 +128,18 @@ ${itemsMessage}
 R$ ${finalTotal}
 `
 
-      setProducts(
-        products.map((product) => {
-          const cartItem = cart.find((item) => item.id === product.id)
+    setProducts(
+  products.map((product) => {
+    const cartItem = cart.find((item) => item.id === product.id)
 
-          if (cartItem) {
-            return {
-              ...product,
-              stock: product.stock - cartItem.quantity,
-            }
-          }
+    if (!cartItem) return product
 
-          return product
-        })
-      )
-
+    return {
+      ...product,
+      stock: Math.max(0, product.stock - cartItem.quantity),
+    }
+  })
+)
       const phone = "5535984128081"
 
       window.open(

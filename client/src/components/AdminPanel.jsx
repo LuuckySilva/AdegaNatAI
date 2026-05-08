@@ -39,7 +39,7 @@ function AdminPanel({
   }
 
   function handleSubmit() {
-    if (!name || !price || !stock || !image) {
+    if (!name || price === "" || stock === "" || !image) {
       alert("Preencha os campos obrigatórios.")
       return
     }
@@ -67,18 +67,25 @@ function AdminPanel({
   }
 
   function handleEdit(product) {
-    setEditingProduct(product)
-    setName(product.name)
-    setCategory(product.category)
-    setPrice(product.price)
-    setStock(product.stock)
-    setImage(product.image)
-    setDescription(product.description)
-    setActive(product.active)
-    setIsPromotion(product.isPromotion)
-    setPromoValidUntil(product.promoValidUntil)
-    setActiveTab("Produtos")
-  }
+  setEditingProduct(product)
+  setName(product.name)
+  setCategory(product.category)
+  setPrice(String(product.price))
+  setStock(String(product.stock))
+  setImage(product.image)
+  setDescription(product.description || "")
+  setActive(product.active)
+  setIsPromotion(product.isPromotion)
+  setPromoValidUntil(product.promoValidUntil || "")
+  setActiveTab("Produtos")
+
+  setTimeout(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }, 100)
+}
 
   const totalProducts = products.length
   const activeProducts = products.filter((product) => product.active).length
