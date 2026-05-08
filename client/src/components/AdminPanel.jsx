@@ -6,6 +6,7 @@ function AdminPanel({
   products,
   updateStock,
   clearMonthlyOrders,
+  resetStock,
 }) {
   if (!showAdmin) return null
 
@@ -17,7 +18,14 @@ function AdminPanel({
             Painel Administrativo
           </h3>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={resetStock}
+              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl font-bold"
+            >
+              Resetar estoque
+            </button>
+
             <button
               onClick={clearMonthlyOrders}
               className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-xl font-bold"

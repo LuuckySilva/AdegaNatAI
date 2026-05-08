@@ -45,6 +45,15 @@ function App() {
       ? products
       : products.filter((product) => product.category === selectedCategory)
 
+  function resetStock() {
+    const confirmReset = confirm("Tem certeza que deseja resetar o estoque?")
+
+    if (!confirmReset) return
+
+    setProducts(initialProducts)
+    localStorage.setItem("adegaNatProducts", JSON.stringify(initialProducts))
+  }
+
   function clearMonthlyOrders() {
     const confirmClear = confirm("Tem certeza que deseja limpar os pedidos do mês?")
 
@@ -149,7 +158,7 @@ R$ ${total}
     saveOrder(newOrder)
     setSavedOrders(getSavedOrders())
 
-    const url = `https://wa.me/5535984128081?text=${encodeURIComponent(
+    const url = `https://wa.me/5535984760977?text=${encodeURIComponent(
       finalMessage
     )}`
 
@@ -228,6 +237,7 @@ R$ ${total}
         products={products}
         updateStock={updateStock}
         clearMonthlyOrders={clearMonthlyOrders}
+        resetStock={resetStock}
       />
 
       <Cart
