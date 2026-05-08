@@ -18,10 +18,7 @@ import {
 function App() {
   const [products, setProducts] = useState(() => {
     const savedProducts = localStorage.getItem("adegaNatProducts")
-
-    return savedProducts
-      ? JSON.parse(savedProducts)
-      : initialProducts
+    return savedProducts ? JSON.parse(savedProducts) : initialProducts
   })
 
   const [cart, setCart] = useState([])
@@ -33,10 +30,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState("Todos")
 
   useEffect(() => {
-    localStorage.setItem(
-      "adegaNatProducts",
-      JSON.stringify(products)
-    )
+    localStorage.setItem("adegaNatProducts", JSON.stringify(products))
   }, [products])
 
   const monthlyRevenue = getMonthlyRevenue()
@@ -49,18 +43,34 @@ function App() {
   const filteredProducts =
     selectedCategory === "Todos"
       ? products
-      : products.filter(
-          (product) => product.category === selectedCategory
-        )
+      : products.filter((product) => product.category === selectedCategory)
+
+  function clearMonthlyOrders() {
+    const confirmClear = confirm("Tem certeza que deseja limpar os pedidos do mês?")
+
+    if (!confirmClear) return
+
+    const currentMonth = new Date().getMonth()
+    const currentYear = new Date().getFullYear()
+
+    localStorage.setItem(
+      "adegaNatOrders",
+      JSON.stringify({
+        month: currentMonth,
+        year: currentYear,
+        lastOrderNumber: 0,
+        orders: [],
+      })
+    )
+
+    setSavedOrders([])
+  }
 
   function updateStock(productId, amount) {
     setProducts(
       products.map((product) =>
         product.id === productId
-          ? {
-              ...product,
-              stock: Math.max(0, product.stock + amount),
-            }
+          ? { ...product, stock: Math.max(0, product.stock + amount) }
           : product
       )
     )
@@ -217,6 +227,7 @@ R$ ${total}
         monthlyRevenue={monthlyRevenue}
         products={products}
         updateStock={updateStock}
+        clearMonthlyOrders={clearMonthlyOrders}
       />
 
       <Cart
