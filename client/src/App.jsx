@@ -30,6 +30,7 @@ function App() {
   const [address, setAddress] = useState("")
   const [showAdmin, setShowAdmin] = useState(false)
   const [savedOrders, setSavedOrders] = useState(getSavedOrders())
+  const [selectedCategory, setSelectedCategory] = useState("Todos")
 
   useEffect(() => {
     localStorage.setItem(
@@ -44,6 +45,13 @@ function App() {
     (acc, item) => acc + item.price * item.quantity,
     0
   )
+
+  const filteredProducts =
+    selectedCategory === "Todos"
+      ? products
+      : products.filter(
+          (product) => product.category === selectedCategory
+        )
 
   function updateStock(productId, amount) {
     setProducts(
@@ -175,22 +183,24 @@ R$ ${total}
           </h3>
 
           <div className="flex gap-3 overflow-x-auto pb-2">
-            <button className="bg-zinc-900 px-5 py-2 rounded-xl border border-zinc-800">
-              Whisky
-            </button>
-
-            <button className="bg-zinc-900 px-5 py-2 rounded-xl border border-zinc-800">
-              Cerveja
-            </button>
-
-            <button className="bg-zinc-900 px-5 py-2 rounded-xl border border-zinc-800">
-              Vodka
-            </button>
+            {["Todos", "Whisky", "Cerveja", "Vodka"].map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-5 py-2 rounded-xl border transition ${
+                  selectedCategory === category
+                    ? "bg-amber-500 text-black border-amber-500"
+                    : "bg-zinc-900 border-zinc-800"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
