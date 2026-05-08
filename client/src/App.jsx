@@ -10,7 +10,6 @@ import initialProducts from "./data/products"
 
 import {
   getSavedOrders,
-  getMonthlyRevenue,
   getNextOrderNumber,
   saveOrder,
 } from "./utils/orders"
@@ -29,7 +28,12 @@ function App() {
   const [phone, setPhone] = useState("")
   const [address, setAddress] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("")
+  const [deliveryFee, setDeliveryFee] = useState("")
+  const [observation, setObservation] = useState("")
   const [isAdult, setIsAdult] = useState(false)
+  const [hasConfirmedAge, setHasConfirmedAge] = useState(
+    localStorage.getItem("adegaNatAgeConfirmed") === "true"
+  )
   const [showAdmin, setShowAdmin] = useState(false)
   const [savedOrders, setSavedOrders] = useState(getSavedOrders())
   const [selectedCategory, setSelectedCategory] = useState("Todos")
@@ -38,10 +42,16 @@ function App() {
     localStorage.setItem("adegaNatProducts", JSON.stringify(products))
   }, [products])
 
-  const monthlyRevenue = getMonthlyRevenue()
-
-  const total = cart.reduce(
+  const productsTotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
+    0
+  )
+
+  const deliveryValue = Number(deliveryFee) || 0
+  const total = productsTotal + deliveryValue
+
+  const monthlyRevenue = savedOrders.reduce(
+    (acc, order) => acc + order.total,
     0
   )
 
@@ -49,6 +59,11 @@ function App() {
     selectedCategory === "Todos"
       ? products
       : products.filter((product) => product.category === selectedCategory)
+
+  function confirmAgeAccess() {
+    localStorage.setItem("adegaNatAgeConfirmed", "true")
+    setHasConfirmedAge(true)
+  }
 
   function handleAdminAccess() {
     if (showAdmin) {
@@ -92,16 +107,42 @@ function App() {
 
   function deleteProduct(productId) {
     const confirmDelete = confirm("Tem certeza que deseja excluir este produto?")
-
     if (!confirmDelete) return
 
     setProducts(products.filter((product) => product.id !== productId))
     setCart(cart.filter((item) => item.id !== productId))
   }
 
+  function updateOrderStatus(orderNumber, newStatus) {
+    const currentMonth = new Date().getMonth()
+    const currentYear = new Date().getFullYear()
+
+    const savedData = JSON.parse(localStorage.getItem("adegaNatOrders")) || {
+      month: currentMonth,
+      year: currentYear,
+      lastOrderNumber: 0,
+      orders: [],
+    }
+
+    const updatedOrders = savedData.orders.map((order) =>
+      order.number === orderNumber
+        ? { ...order, status: newStatus }
+        : order
+    )
+
+    localStorage.setItem(
+      "adegaNatOrders",
+      JSON.stringify({
+        ...savedData,
+        orders: updatedOrders,
+      })
+    )
+
+    setSavedOrders(updatedOrders)
+  }
+
   function resetStock() {
     const confirmReset = confirm("Tem certeza que deseja resetar o estoque?")
-
     if (!confirmReset) return
 
     setProducts(initialProducts)
@@ -171,8 +212,16 @@ function App() {
   }
 
   function sendWhatsApp() {
-    if (!customerName || !phone || !address || !paymentMethod || cart.length === 0) {
-      alert("Preencha nome, telefone, endereço, pagamento e adicione pelo menos 1 produto.")
+    if (
+      !customerName ||
+      !phone ||
+      !address ||
+      !paymentMethod ||
+      cart.length === 0
+    ) {
+      alert(
+        "Preencha nome, telefone, endereço, pagamento e adicione pelo menos 1 produto."
+      )
       return
     }
 
@@ -196,6 +245,7 @@ function App() {
 🍷 NOVO PEDIDO - ADEGA NAT AI
 
 📦 Pedido Nº: ${orderNumber}
+📌 Status: Novo
 
 👤 Cliente:
 ${customerName}
@@ -215,6 +265,12 @@ ${paymentMethod}
 🛒 Itens:
 ${itemsMessage}
 
+🚚 Taxa de entrega:
+R$ ${deliveryValue}
+
+📝 Observação:
+${observation || "Nenhuma"}
+
 💰 Total:
 R$ ${total}
 `
@@ -225,8 +281,12 @@ R$ ${total}
       phone,
       address,
       paymentMethod,
+      deliveryFee: deliveryValue,
+      observation,
+      status: "Novo",
       isAdult,
       items: cart,
+      productsTotal,
       total,
       date: new Date().toISOString(),
     }
@@ -260,12 +320,35 @@ R$ ${total}
     setPhone("")
     setAddress("")
     setPaymentMethod("")
+    setDeliveryFee("")
+    setObservation("")
     setIsAdult(false)
     setIsCartOpen(false)
   }
 
   return (
     <div className="bg-black text-white min-h-screen overflow-x-hidden">
+      {!hasConfirmedAge && (
+        <div className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center px-6">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 max-w-md text-center">
+            <h2 className="text-3xl font-black text-amber-400 mb-4">
+              Confirmação de idade
+            </h2>
+
+            <p className="text-zinc-300 mb-6">
+              Este site contém produtos destinados apenas para maiores de 18 anos.
+            </p>
+
+            <button
+              onClick={confirmAgeAccess}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-4 rounded-2xl"
+            >
+              Tenho 18 anos ou mais
+            </button>
+          </div>
+        </div>
+      )}
+
       <Header
         showAdmin={showAdmin}
         handleAdminAccess={handleAdminAccess}
@@ -320,10 +403,14 @@ R$ ${total}
         addProduct={addProduct}
         updateProduct={updateProduct}
         deleteProduct={deleteProduct}
+        updateOrderStatus={updateOrderStatus}
       />
 
       <Cart
         cart={cart}
+        productsTotal={productsTotal}
+        deliveryFee={deliveryFee}
+        setDeliveryFee={setDeliveryFee}
         total={total}
         customerName={customerName}
         setCustomerName={setCustomerName}
@@ -333,6 +420,8 @@ R$ ${total}
         setAddress={setAddress}
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
+        observation={observation}
+        setObservation={setObservation}
         isAdult={isAdult}
         setIsAdult={setIsAdult}
         addToCart={addToCart}

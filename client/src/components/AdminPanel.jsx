@@ -12,6 +12,7 @@ function AdminPanel({
   addProduct,
   updateProduct,
   deleteProduct,
+  updateOrderStatus,
 }) {
   const [name, setName] = useState("")
   const [category, setCategory] = useState("")
@@ -122,9 +123,7 @@ function AdminPanel({
           </div>
         </div>
 
-        <h4 className="text-2xl font-bold mb-5">
-          Adicionar Produto
-        </h4>
+        <h4 className="text-2xl font-bold mb-5">Adicionar Produto</h4>
 
         <div className="grid md:grid-cols-2 gap-4 mb-10">
           <input
@@ -175,9 +174,7 @@ function AdminPanel({
           </button>
         </div>
 
-        <h4 className="text-2xl font-bold mb-5">
-          Produtos cadastrados
-        </h4>
+        <h4 className="text-2xl font-bold mb-5">Produtos cadastrados</h4>
 
         <div className="grid md:grid-cols-2 gap-4 mb-10">
           {products.map((product) => (
@@ -271,9 +268,7 @@ function AdminPanel({
                     className="h-40 w-full object-cover rounded-xl mb-4"
                   />
 
-                  <h5 className="font-bold text-lg">
-                    {product.name}
-                  </h5>
+                  <h5 className="font-bold text-lg">{product.name}</h5>
 
                   <p className="text-zinc-400 mt-1">
                     Categoria: {product.category}
@@ -322,9 +317,7 @@ function AdminPanel({
           ))}
         </div>
 
-        <h4 className="text-2xl font-bold mb-5">
-          Últimos pedidos
-        </h4>
+        <h4 className="text-2xl font-bold mb-5">Últimos pedidos</h4>
 
         <div className="space-y-4">
           {savedOrders.length === 0 && (
@@ -358,11 +351,28 @@ function AdminPanel({
                 </div>
 
                 <div className="space-y-2 text-zinc-300 mb-4">
+                  <p>📌 Status: {order.status || "Novo"}</p>
+
+                  <select
+                    value={order.status || "Novo"}
+                    onChange={(e) =>
+                      updateOrderStatus(order.number, e.target.value)
+                    }
+                    className="w-full md:w-64 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                  >
+                    <option value="Novo">Novo</option>
+                    <option value="Em preparo">Em preparo</option>
+                    <option value="Saiu para entrega">
+                      Saiu para entrega
+                    </option>
+                    <option value="Finalizado">Finalizado</option>
+                  </select>
+
                   <p>📞 {order.phone}</p>
-
                   <p>📍 {order.address}</p>
-
                   <p>💳 {order.paymentMethod}</p>
+                  <p>🚚 Entrega: R$ {order.deliveryFee || 0}</p>
+                  <p>📝 {order.observation || "Sem observação"}</p>
 
                   <p>
                     🔞{" "}
@@ -372,21 +382,14 @@ function AdminPanel({
                   </p>
 
                   <p>
-                    📅{" "}
-                    {new Date(order.date).toLocaleString(
-                      "pt-BR"
-                    )}
+                    📅 {new Date(order.date).toLocaleString("pt-BR")}
                   </p>
                 </div>
 
                 <div className="space-y-1 border-t border-zinc-800 pt-4">
                   {order.items.map((item) => (
-                    <p
-                      key={item.id}
-                      className="text-zinc-300"
-                    >
-                      • {item.name} ({item.quantity}x)
-                      - R$ {item.price * item.quantity}
+                    <p key={item.id} className="text-zinc-300">
+                      • {item.name} ({item.quantity}x) - R$ {item.price * item.quantity}
                     </p>
                   ))}
                 </div>

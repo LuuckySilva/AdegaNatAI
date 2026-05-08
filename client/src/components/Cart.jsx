@@ -1,5 +1,8 @@
 function Cart({
   cart,
+  productsTotal,
+  deliveryFee,
+  setDeliveryFee,
   total,
   customerName,
   setCustomerName,
@@ -9,6 +12,8 @@ function Cart({
   setAddress,
   paymentMethod,
   setPaymentMethod,
+  observation,
+  setObservation,
   isAdult,
   setIsAdult,
   addToCart,
@@ -88,26 +93,27 @@ function Cart({
               onChange={(e) => setPaymentMethod(e.target.value)}
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
             >
-              <option value="">
-                Forma de pagamento
-              </option>
-
-              <option value="Pix">
-                Pix
-              </option>
-
-              <option value="Dinheiro">
-                Dinheiro
-              </option>
-
-              <option value="Cartão de crédito">
-                Cartão de crédito
-              </option>
-
-              <option value="Cartão de débito">
-                Cartão de débito
-              </option>
+              <option value="">Forma de pagamento</option>
+              <option value="Pix">Pix</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão de crédito">Cartão de crédito</option>
+              <option value="Cartão de débito">Cartão de débito</option>
             </select>
+
+            <input
+              type="number"
+              placeholder="Taxa de entrega"
+              value={deliveryFee}
+              onChange={(e) => setDeliveryFee(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+            />
+
+            <textarea
+              placeholder="Observação do pedido"
+              value={observation}
+              onChange={(e) => setObservation(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none min-h-24"
+            />
 
             <label className="flex items-start gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-300">
               <input
@@ -148,15 +154,11 @@ function Cart({
                             product.id === item.id
                               ? {
                                   ...product,
-                                  quantity:
-                                    product.quantity - 1,
+                                  quantity: product.quantity - 1,
                                 }
                               : product
                           )
-                          .filter(
-                            (product) =>
-                              product.quantity > 0
-                          )
+                          .filter((product) => product.quantity > 0)
                       )
                     }
                     className="bg-zinc-700 hover:bg-zinc-600 px-3 py-1 rounded-lg text-sm"
@@ -174,10 +176,7 @@ function Cart({
                   <button
                     onClick={() =>
                       setCart(
-                        cart.filter(
-                          (product) =>
-                            product.id !== item.id
-                        )
+                        cart.filter((product) => product.id !== item.id)
                       )
                     }
                     className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm"
@@ -191,10 +190,18 @@ function Cart({
         </div>
 
         <div className="border-t border-zinc-800 p-5 bg-zinc-950">
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span className="text-zinc-400">Produtos</span>
+            <span>R$ {productsTotal}</span>
+          </div>
+
+          <div className="flex items-center justify-between text-sm mb-4">
+            <span className="text-zinc-400">Entrega</span>
+            <span>R$ {Number(deliveryFee) || 0}</span>
+          </div>
+
           <div className="flex items-center justify-between mb-4">
-            <span className="text-zinc-400">
-              Total
-            </span>
+            <span className="text-zinc-400">Total</span>
 
             <span className="text-2xl font-black text-amber-400">
               R$ {total}
