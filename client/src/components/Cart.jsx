@@ -1,8 +1,3 @@
-import {
-  getNextOrderNumber,
-  saveOrder,
-} from "../utils/orders"
-
 function Cart({
   cart,
   setCart,
@@ -12,6 +7,8 @@ function Cart({
   products,
   setProducts,
 }) {
+  const API_URL = "http://localhost:3000"
+
   const total = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -34,16 +31,13 @@ function Cart({
   }
 
   function handleEnter(event) {
-    if (
-      event.key === "Enter" &&
-      event.target.tagName !== "TEXTAREA"
-    ) {
+    if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
       event.preventDefault()
       sendWhatsApp()
     }
   }
 
-  function sendWhatsApp() {
+  async function sendWhatsApp() {
     const customerName = document.getElementById("customerName").value
     const customerPhone = document.getElementById("customerPhone").value
     const customerAddress = document.getElementById("customerAddress").value
@@ -53,12 +47,7 @@ function Cart({
     const observation = document.getElementById("observation").value
     const isAdult = document.getElementById("isAdult").checked
 
-    if (
-      !customerName ||
-      !customerPhone ||
-      !customerAddress ||
-      !paymentMethod
-    ) {
+    if (!customerName || !customerPhone || !customerAddress || !paymentMethod) {
       alert("Preencha todos os dados.")
       return
     }
@@ -68,22 +57,52 @@ function Cart({
       return
     }
 
-    const orderNumber = getNextOrderNumber()
+    if (cart.length === 0) {
+      alert("Adicione pelo menos 1 produto ao carrinho.")
+      return
+    }
+
     const finalTotal = total + deliveryFee
 
-    const itemsMessage = cart
-      .map(
-        (item) =>
-          `• ${item.name} (${item.quantity}x) - R$ ${
-            item.price * item.quantity
-          }`
-      )
-      .join("\n")
+    const orderPayload = {
+      customerName,
+      customerPhone,
+      address: customerAddress,
+      paymentMethod,
+      deliveryTax: deliveryFee,
+      notes: observation,
+      products: cart,
+      total: finalTotal,
+    }
 
-    const message = `
+    try {
+      const response = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderPayload),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erro ao salvar pedido.")
+      }
+
+      const savedOrder = await response.json()
+
+      const itemsMessage = cart
+        .map(
+          (item) =>
+            `• ${item.name} (${item.quantity}x) - R$ ${
+              item.price * item.quantity
+            }`
+        )
+        .join("\n")
+
+      const message = `
 🛒 NOVO PEDIDO - ADEGA NAT AI
 
-📦 Pedido Nº: ${orderNumber}
+📦 Pedido Nº: ${savedOrder.number}
 
 👤 Cliente:
 ${customerName}
@@ -110,46 +129,34 @@ ${itemsMessage}
 R$ ${finalTotal}
 `
 
-    const orderData = {
-      number: orderNumber,
-      customerName,
-      customerPhone,
-      customerAddress,
-      paymentMethod,
-      deliveryFee,
-      observation,
-      items: cart,
-      total: finalTotal,
-      status: "Novo",
-      createdAt: new Date().toLocaleString(),
-    }
+      setProducts(
+        products.map((product) => {
+          const cartItem = cart.find((item) => item.id === product.id)
 
-    saveOrder(orderData)
-
-    setProducts(
-      products.map((product) => {
-        const cartItem = cart.find((item) => item.id === product.id)
-
-        if (cartItem) {
-          return {
-            ...product,
-            stock: product.stock - cartItem.quantity,
+          if (cartItem) {
+            return {
+              ...product,
+              stock: product.stock - cartItem.quantity,
+            }
           }
-        }
 
-        return product
-      })
-    )
+          return product
+        })
+      )
 
-    const phone = "5535984128081"
+      const phone = "5535984128081"
 
-    window.open(
-      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    )
+      window.open(
+        `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+        "_blank"
+      )
 
-    setCart([])
-    setIsCartOpen(false)
+      setCart([])
+      setIsCartOpen(false)
+    } catch (error) {
+      console.error("Erro ao finalizar pedido:", error)
+      alert("Erro ao finalizar pedido. Verifique se o backend está rodando.")
+    }
   }
 
   return (
@@ -196,9 +203,7 @@ R$ ${finalTotal}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h4 className="font-bold text-lg">
-                      {item.name}
-                    </h4>
+                    <h4 className="font-bold text-lg">{item.name}</h4>
 
                     <span className="text-amber-400">
                       R$ {item.price * item.quantity}
@@ -213,9 +218,7 @@ R$ ${finalTotal}
                       -
                     </button>
 
-                    <span className="font-bold">
-                      {item.quantity}
-                    </span>
+                    <span className="font-bold">{item.quantity}</span>
 
                     <button
                       onClick={() => addToCart(item)}
@@ -298,9 +301,7 @@ R$ ${finalTotal}
 
         <div className="border-t border-zinc-800 p-6">
           <div className="flex items-center justify-between mb-6">
-            <span className="text-zinc-400">
-              Total
-            </span>
+            <span className="text-zinc-400">Total</span>
 
             <span className="text-4xl font-black text-amber-400">
               R$ {total}

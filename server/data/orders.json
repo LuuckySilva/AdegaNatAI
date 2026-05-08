@@ -1,1 +1,43 @@
-[]
+[
+  {
+    "id": 1778279501031,
+    "number": 1,
+    "customerName": "testes'",
+    "customerPhone": "35984128081",
+    "address": "Av.Minas Gerias",
+    "paymentMethod": "Dinheiro",
+    "deliveryTax": 5,
+    "notes": "teste",
+    "products": [
+      {
+        "id": 1,
+        "name": "Combo Premium",
+        "category": "Outros",
+        "price": 129,
+        "stock": 4,
+        "image": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b",
+        "description": "Combo premium para ocasiões especiais.",
+        "active": true,
+        "isPromotion": false,
+        "promoValidUntil": "",
+        "quantity": 1
+      },
+      {
+        "id": 2,
+        "name": "Combo Especial",
+        "category": "Promoções",
+        "price": 89,
+        "stock": 8,
+        "image": "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
+        "description": "Combo promocional por tempo limitado.",
+        "active": true,
+        "isPromotion": true,
+        "promoValidUntil": "2026-05-31",
+        "quantity": 1
+      }
+    ],
+    "total": 223,
+    "status": "Novo",
+    "createdAt": "2026-05-08T22:31:41.031Z"
+  }
+]
