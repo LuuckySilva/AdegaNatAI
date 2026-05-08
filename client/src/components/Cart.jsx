@@ -3,8 +3,12 @@ function Cart({
   total,
   customerName,
   setCustomerName,
+  phone,
+  setPhone,
   address,
   setAddress,
+  paymentMethod,
+  setPaymentMethod,
   isAdult,
   setIsAdult,
   addToCart,
@@ -51,12 +55,32 @@ function Cart({
           />
 
           <input
+            type="tel"
+            placeholder="Telefone do cliente"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+          />
+
+          <input
             type="text"
             placeholder="Endereço completo"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
           />
+
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+          >
+            <option value="">Forma de pagamento</option>
+            <option value="Pix">Pix</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Cartão de crédito">Cartão de crédito</option>
+            <option value="Cartão de débito">Cartão de débito</option>
+          </select>
 
           <label className="flex items-start gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-300">
             <input

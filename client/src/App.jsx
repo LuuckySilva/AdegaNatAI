@@ -26,7 +26,9 @@ function App() {
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [customerName, setCustomerName] = useState("")
+  const [phone, setPhone] = useState("")
   const [address, setAddress] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState("")
   const [isAdult, setIsAdult] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
   const [savedOrders, setSavedOrders] = useState(getSavedOrders())
@@ -169,8 +171,8 @@ function App() {
   }
 
   function sendWhatsApp() {
-    if (!customerName || !address || cart.length === 0) {
-      alert("Preencha nome, endereço e adicione pelo menos 1 produto.")
+    if (!customerName || !phone || !address || !paymentMethod || cart.length === 0) {
+      alert("Preencha nome, telefone, endereço, pagamento e adicione pelo menos 1 produto.")
       return
     }
 
@@ -198,11 +200,17 @@ function App() {
 👤 Cliente:
 ${customerName}
 
+📞 Telefone:
+${phone}
+
 🔞 Maior de idade:
 Sim, cliente confirmou ser maior de 18 anos.
 
 📍 Endereço:
 ${address}
+
+💳 Pagamento:
+${paymentMethod}
 
 🛒 Itens:
 ${itemsMessage}
@@ -214,7 +222,9 @@ R$ ${total}
     const newOrder = {
       number: orderNumber,
       customerName,
+      phone,
       address,
+      paymentMethod,
       isAdult,
       items: cart,
       total,
@@ -247,7 +257,9 @@ R$ ${total}
 
     setCart([])
     setCustomerName("")
+    setPhone("")
     setAddress("")
+    setPaymentMethod("")
     setIsAdult(false)
     setIsCartOpen(false)
   }
@@ -315,8 +327,12 @@ R$ ${total}
         total={total}
         customerName={customerName}
         setCustomerName={setCustomerName}
+        phone={phone}
+        setPhone={setPhone}
         address={address}
         setAddress={setAddress}
+        paymentMethod={paymentMethod}
+        setPaymentMethod={setPaymentMethod}
         isAdult={isAdult}
         setIsAdult={setIsAdult}
         addToCart={addToCart}
