@@ -1,158 +1,204 @@
+import {
+  getNextOrderNumber,
+  saveOrder,
+} from "../utils/orders"
+
 function Cart({
   cart,
-  productsTotal,
-  deliveryFee,
-  setDeliveryFee,
-  total,
-  customerName,
-  setCustomerName,
-  phone,
-  setPhone,
-  address,
-  setAddress,
-  paymentMethod,
-  setPaymentMethod,
-  observation,
-  setObservation,
-  isAdult,
-  setIsAdult,
-  addToCart,
   setCart,
-  sendWhatsApp,
+  addToCart,
   isCartOpen,
   setIsCartOpen,
+  products,
+  setProducts,
 }) {
-  function handleKeyDown(event) {
-    if (event.key === "Enter") {
+  const total = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  )
+
+  function handleRemoveOne(itemId) {
+    setCart(
+      cart
+        .map((product) =>
+          product.id === itemId
+            ? { ...product, quantity: product.quantity - 1 }
+            : product
+        )
+        .filter((product) => product.quantity > 0)
+    )
+  }
+
+  function handleRemoveItem(itemId) {
+    setCart(cart.filter((product) => product.id !== itemId))
+  }
+
+  function handleEnter(event) {
+    if (
+      event.key === "Enter" &&
+      event.target.tagName !== "TEXTAREA"
+    ) {
       event.preventDefault()
       sendWhatsApp()
     }
+  }
+
+  function sendWhatsApp() {
+    const customerName = document.getElementById("customerName").value
+    const customerPhone = document.getElementById("customerPhone").value
+    const customerAddress = document.getElementById("customerAddress").value
+    const paymentMethod = document.getElementById("paymentMethod").value
+    const deliveryFee =
+      Number(document.getElementById("deliveryFee").value) || 0
+    const observation = document.getElementById("observation").value
+    const isAdult = document.getElementById("isAdult").checked
+
+    if (
+      !customerName ||
+      !customerPhone ||
+      !customerAddress ||
+      !paymentMethod
+    ) {
+      alert("Preencha todos os dados.")
+      return
+    }
+
+    if (!isAdult) {
+      alert("Confirme a maioridade.")
+      return
+    }
+
+    const orderNumber = getNextOrderNumber()
+    const finalTotal = total + deliveryFee
+
+    const itemsMessage = cart
+      .map(
+        (item) =>
+          `• ${item.name} (${item.quantity}x) - R$ ${
+            item.price * item.quantity
+          }`
+      )
+      .join("\n")
+
+    const message = `
+🛒 NOVO PEDIDO - ADEGA NAT AI
+
+📦 Pedido Nº: ${orderNumber}
+
+👤 Cliente:
+${customerName}
+
+📞 Telefone:
+${customerPhone}
+
+📍 Endereço:
+${customerAddress}
+
+💳 Pagamento:
+${paymentMethod}
+
+🚚 Taxa:
+R$ ${deliveryFee}
+
+📝 Observação:
+${observation || "Sem observação"}
+
+📋 Itens:
+${itemsMessage}
+
+💰 Total:
+R$ ${finalTotal}
+`
+
+    const orderData = {
+      number: orderNumber,
+      customerName,
+      customerPhone,
+      customerAddress,
+      paymentMethod,
+      deliveryFee,
+      observation,
+      items: cart,
+      total: finalTotal,
+      status: "Novo",
+      createdAt: new Date().toLocaleString(),
+    }
+
+    saveOrder(orderData)
+
+    setProducts(
+      products.map((product) => {
+        const cartItem = cart.find((item) => item.id === product.id)
+
+        if (cartItem) {
+          return {
+            ...product,
+            stock: product.stock - cartItem.quantity,
+          }
+        }
+
+        return product
+      })
+    )
+
+    const phone = "5535984128081"
+
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    )
+
+    setCart([])
+    setIsCartOpen(false)
   }
 
   return (
     <>
       <button
         onClick={() => setIsCartOpen(true)}
-        className="fixed bottom-5 right-5 z-50 bg-amber-500 hover:bg-amber-600 px-5 py-4 rounded-2xl text-black font-black shadow-2xl"
+        className="fixed bottom-5 right-5 z-50 bg-amber-500 hover:bg-amber-600 text-black font-black px-6 py-4 rounded-2xl shadow-2xl"
       >
         🛒 Carrinho ({cart.length})
       </button>
 
       <div
-        className={`
-          fixed z-50
-          right-0 bottom-0
-          w-full md:w-96
-          bg-zinc-950 border border-zinc-800
-          rounded-t-3xl md:rounded-t-none md:rounded-l-3xl
-          transition-transform duration-300
-          flex flex-col
-          max-h-[95vh] md:h-screen
-          ${
-            isCartOpen
-              ? "translate-x-0 translate-y-0"
-              : "translate-y-full md:translate-y-0 md:translate-x-full"
-          }
-        `}
+        className={`fixed right-0 bottom-0 md:top-0 z-[999] bg-zinc-950 border border-zinc-800 h-[95vh] md:h-screen w-full sm:w-[420px] rounded-t-3xl md:rounded-none transition-transform duration-300 flex flex-col ${
+          isCartOpen
+            ? "translate-x-0 translate-y-0"
+            : "translate-y-full md:translate-y-0 md:translate-x-full"
+        }`}
       >
-        <div className="flex items-center justify-between p-5 border-b border-zinc-800">
-          <h3 className="text-2xl font-bold">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+          <h2 className="text-3xl font-black">
             Carrinho ({cart.length})
-          </h3>
+          </h2>
 
           <button
             onClick={() => setIsCartOpen(false)}
-            className="bg-zinc-800 hover:bg-zinc-700 w-10 h-10 rounded-full font-bold"
+            className="bg-zinc-800 hover:bg-zinc-700 w-12 h-12 rounded-full font-bold"
           >
             X
           </button>
         </div>
 
-        <form
-          onSubmit={(event) => {
-            event.preventDefault()
-            sendWhatsApp()
-          }}
-          onKeyDown={handleKeyDown}
-          className="flex flex-col flex-1 overflow-hidden"
-        >
-          <div className="flex-1 overflow-y-auto p-5">
-            <div className="space-y-3 mb-5">
-              <input
-                type="text"
-                placeholder="Nome do cliente"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
-              />
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-4">
+            {cart.length === 0 && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-center text-zinc-400">
+                Nenhum produto no carrinho.
+              </div>
+            )}
 
-              <input
-                type="tel"
-                placeholder="Telefone do cliente"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
-              />
-
-              <input
-                type="text"
-                placeholder="Endereço completo"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
-              />
-
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+            {cart.map((item) => (
+              <div
+                key={item.id}
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"
               >
-                <option value="">Forma de pagamento</option>
-                <option value="Pix">Pix</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Cartão de crédito">Cartão de crédito</option>
-                <option value="Cartão de débito">Cartão de débito</option>
-              </select>
-
-              <input
-                type="number"
-                placeholder="Taxa de entrega"
-                value={deliveryFee}
-                onChange={(e) => setDeliveryFee(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
-              />
-
-              <textarea
-                placeholder="Observação do pedido"
-                value={observation}
-                onChange={(e) => setObservation(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none min-h-24"
-              />
-
-              <label className="flex items-start gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-300">
-                <input
-                  type="checkbox"
-                  checked={isAdult}
-                  onChange={(e) => setIsAdult(e.target.checked)}
-                  className="mt-1"
-                />
-
-                <span>
-                  Confirmo que o cliente tem 18 anos ou mais.
-                </span>
-              </label>
-            </div>
-
-            <div className="space-y-3">
-              {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between bg-zinc-900 p-3 rounded-xl gap-3"
-                >
+                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold">
-                      {item.name} ({item.quantity}x)
-                    </p>
+                    <h4 className="font-bold text-lg">
+                      {item.name}
+                    </h4>
 
                     <span className="text-amber-400">
                       R$ {item.price * item.quantity}
@@ -161,78 +207,113 @@ function Cart({
 
                   <div className="flex items-center gap-2">
                     <button
-                      type="button"
-                      onClick={() =>
-                        setCart(
-                          cart
-                            .map((product) =>
-                              product.id === item.id
-                                ? {
-                                    ...product,
-                                    quantity: product.quantity - 1,
-                                  }
-                                : product
-                            )
-                            .filter((product) => product.quantity > 0)
-                        )
-                      }
-                      className="bg-zinc-700 hover:bg-zinc-600 px-3 py-1 rounded-lg text-sm"
+                      onClick={() => handleRemoveOne(item.id)}
+                      className="bg-zinc-700 hover:bg-zinc-600 w-8 h-8 rounded-lg"
                     >
                       -
                     </button>
 
+                    <span className="font-bold">
+                      {item.quantity}
+                    </span>
+
                     <button
-                      type="button"
                       onClick={() => addToCart(item)}
-                      className="bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded-lg text-sm text-black font-bold"
+                      className="bg-amber-500 hover:bg-amber-600 text-black w-8 h-8 rounded-lg font-bold"
                     >
                       +
                     </button>
 
                     <button
-                      type="button"
-                      onClick={() =>
-                        setCart(
-                          cart.filter((product) => product.id !== item.id)
-                        )
-                      }
-                      className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm"
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="bg-red-500 hover:bg-red-600 w-8 h-8 rounded-lg"
                     >
                       X
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          <div className="border-t border-zinc-800 p-5 bg-zinc-950">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-zinc-400">Produtos</span>
-              <span>R$ {productsTotal}</span>
-            </div>
+          <div className="mt-8 space-y-4">
+            <input
+              id="customerName"
+              type="text"
+              placeholder="Nome do cliente"
+              onKeyDown={handleEnter}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4"
+            />
 
-            <div className="flex items-center justify-between text-sm mb-4">
-              <span className="text-zinc-400">Entrega</span>
-              <span>R$ {Number(deliveryFee) || 0}</span>
-            </div>
+            <input
+              id="customerPhone"
+              type="text"
+              placeholder="Telefone"
+              onKeyDown={handleEnter}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4"
+            />
 
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-zinc-400">Total</span>
+            <input
+              id="customerAddress"
+              type="text"
+              placeholder="Endereço completo"
+              onKeyDown={handleEnter}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4"
+            />
 
-              <span className="text-2xl font-black text-amber-400">
-                R$ {total}
-              </span>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-green-500 hover:bg-green-600 py-4 rounded-2xl font-bold transition"
+            <select
+              id="paymentMethod"
+              onKeyDown={handleEnter}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4"
             >
-              Enviar Pedido
-            </button>
+              <option value="">Forma de pagamento</option>
+              <option>Dinheiro</option>
+              <option>Pix</option>
+              <option>Cartão</option>
+            </select>
+
+            <input
+              id="deliveryFee"
+              type="number"
+              placeholder="Taxa de entrega"
+              onKeyDown={handleEnter}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4"
+            />
+
+            <textarea
+              id="observation"
+              placeholder="Observações"
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 min-h-[120px]"
+            />
+
+            <label className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4">
+              <input id="isAdult" type="checkbox" />
+
+              <span className="text-sm text-zinc-300">
+                Confirmo que o cliente possui 18 anos ou mais.
+              </span>
+            </label>
           </div>
-        </form>
+        </div>
+
+        <div className="border-t border-zinc-800 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-zinc-400">
+              Total
+            </span>
+
+            <span className="text-4xl font-black text-amber-400">
+              R$ {total}
+            </span>
+          </div>
+
+          <button
+            onClick={sendWhatsApp}
+            className="w-full bg-green-500 hover:bg-green-600 text-black font-black py-5 rounded-2xl text-lg"
+          >
+            Finalizar Pedido
+          </button>
+        </div>
       </div>
     </>
   )

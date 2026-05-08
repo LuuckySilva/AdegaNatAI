@@ -1,16 +1,33 @@
 export function getSavedOrders() {
-  return (
-    JSON.parse(localStorage.getItem("adegaNatOrders"))?.orders || []
-  )
-}
+  const currentMonth = new Date().getMonth()
+  const currentYear = new Date().getFullYear()
 
-export function getMonthlyRevenue() {
-  const orders = getSavedOrders()
-
-  return orders.reduce(
-    (acc, order) => acc + order.total,
-    0
+  const savedData = JSON.parse(
+    localStorage.getItem("adegaNatOrders")
   )
+
+  if (!savedData) {
+    return []
+  }
+
+  if (
+    savedData.month !== currentMonth ||
+    savedData.year !== currentYear
+  ) {
+    localStorage.setItem(
+      "adegaNatOrders",
+      JSON.stringify({
+        month: currentMonth,
+        year: currentYear,
+        lastOrderNumber: 0,
+        orders: [],
+      })
+    )
+
+    return []
+  }
+
+  return savedData.orders || []
 }
 
 export function getNextOrderNumber() {
@@ -18,7 +35,9 @@ export function getNextOrderNumber() {
   const currentYear = new Date().getFullYear()
 
   const savedData =
-    JSON.parse(localStorage.getItem("adegaNatOrders")) || {
+    JSON.parse(
+      localStorage.getItem("adegaNatOrders")
+    ) || {
       month: currentMonth,
       year: currentYear,
       lastOrderNumber: 0,
@@ -32,7 +51,7 @@ export function getNextOrderNumber() {
     const resetData = {
       month: currentMonth,
       year: currentYear,
-      lastOrderNumber: 0,
+      lastOrderNumber: 1,
       orders: [],
     }
 
@@ -44,7 +63,14 @@ export function getNextOrderNumber() {
     return 1
   }
 
-  return savedData.lastOrderNumber + 1
+  savedData.lastOrderNumber += 1
+
+  localStorage.setItem(
+    "adegaNatOrders",
+    JSON.stringify(savedData)
+  )
+
+  return savedData.lastOrderNumber
 }
 
 export function saveOrder(order) {
@@ -52,23 +78,19 @@ export function saveOrder(order) {
   const currentYear = new Date().getFullYear()
 
   const savedData =
-    JSON.parse(localStorage.getItem("adegaNatOrders")) || {
+    JSON.parse(
+      localStorage.getItem("adegaNatOrders")
+    ) || {
       month: currentMonth,
       year: currentYear,
       lastOrderNumber: 0,
       orders: [],
     }
 
-  const updatedData = {
-    ...savedData,
-    month: currentMonth,
-    year: currentYear,
-    lastOrderNumber: order.number,
-    orders: [...savedData.orders, order],
-  }
+  savedData.orders.push(order)
 
   localStorage.setItem(
     "adegaNatOrders",
-    JSON.stringify(updatedData)
+    JSON.stringify(savedData)
   )
 }
