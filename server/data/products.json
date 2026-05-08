@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Combo Premium",
+    "category": "Outros",
+    "price": 129,
+    "stock": 4,
+    "image": "https://images.unsplash.com/photo-1542838132-92c53300491e",
+    "description": "Produto destaque do catálogo.",
+    "active": true,
+    "isPromotion": false,
+    "promoValidUntil": ""
+  },
+  {
+    "id": 2,
+    "name": "Combo Especial",
+    "category": "Promoções",
+    "price": 89,
+    "stock": 8,
+    "image": "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
+    "description": "Combo promocional por tempo limitado.",
+    "active": true,
+    "isPromotion": true,
+    "promoValidUntil": "2026-05-31"
+  }
+]
