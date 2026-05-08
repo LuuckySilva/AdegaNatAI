@@ -321,6 +321,78 @@ function AdminPanel({
             </div>
           ))}
         </div>
+
+        <h4 className="text-2xl font-bold mb-5">
+          Últimos pedidos
+        </h4>
+
+        <div className="space-y-4">
+          {savedOrders.length === 0 && (
+            <p className="text-zinc-400">
+              Nenhum pedido registrado ainda.
+            </p>
+          )}
+
+          {savedOrders
+            .slice()
+            .reverse()
+            .map((order) => (
+              <div
+                key={order.number}
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <p className="text-amber-400 font-bold">
+                      Pedido Nº {order.number}
+                    </p>
+
+                    <h5 className="text-xl font-bold">
+                      {order.customerName}
+                    </h5>
+                  </div>
+
+                  <strong className="text-2xl text-amber-400">
+                    R$ {order.total}
+                  </strong>
+                </div>
+
+                <div className="space-y-2 text-zinc-300 mb-4">
+                  <p>📞 {order.phone}</p>
+
+                  <p>📍 {order.address}</p>
+
+                  <p>💳 {order.paymentMethod}</p>
+
+                  <p>
+                    🔞{" "}
+                    {order.isAdult
+                      ? "Maioridade confirmada"
+                      : "Não confirmado"}
+                  </p>
+
+                  <p>
+                    📅{" "}
+                    {new Date(order.date).toLocaleString(
+                      "pt-BR"
+                    )}
+                  </p>
+                </div>
+
+                <div className="space-y-1 border-t border-zinc-800 pt-4">
+                  {order.items.map((item) => (
+                    <p
+                      key={item.id}
+                      className="text-zinc-300"
+                    >
+                      • {item.name} ({item.quantity}x)
+                      - R$ {item.price * item.quantity}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            ))}
+        </div>
       </div>
     </section>
   )
