@@ -6,6 +6,7 @@ function Cart({
   setIsCartOpen,
   products,
   setProducts,
+  fetchOrders,
 }) {
   const API_URL = "http://localhost:3000"
 
@@ -149,6 +150,7 @@ R$ ${finalTotal}
 
       setCart([])
       setIsCartOpen(false)
+      fetchOrders()
     } catch (error) {
       console.error("Erro ao finalizar pedido:", error)
       alert("Erro ao finalizar pedido. Verifique se o backend está rodando.")

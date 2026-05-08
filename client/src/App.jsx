@@ -365,14 +365,15 @@ function App() {
       </main>
 
       <Cart
-        cart={cart}
-        setCart={setCart}
-        addToCart={addToCart}
-        isCartOpen={isCartOpen}
-        setIsCartOpen={setIsCartOpen}
-        products={products}
-        setProducts={setProducts}
-      />
+  cart={cart}
+  setCart={setCart}
+  addToCart={addToCart}
+  isCartOpen={isCartOpen}
+  setIsCartOpen={setIsCartOpen}
+  products={products}
+  setProducts={setProducts}
+  fetchOrders={fetchOrders}
+/>
     </div>
   )
 }
