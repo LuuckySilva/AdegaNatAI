@@ -56,17 +56,36 @@ function App() {
     setProducts([...products, product])
   }
 
+  function updateProduct(updatedProduct) {
+    setProducts(
+      products.map((product) =>
+        product.id === updatedProduct.id
+          ? {
+              ...updatedProduct,
+              price: Number(updatedProduct.price),
+              stock: Number(updatedProduct.stock),
+            }
+          : product
+      )
+    )
+  }
+
+  function deleteProduct(productId) {
+    const confirmDelete = confirm("Tem certeza que deseja excluir este produto?")
+
+    if (!confirmDelete) return
+
+    setProducts(products.filter((product) => product.id !== productId))
+    setCart(cart.filter((item) => item.id !== productId))
+  }
+
   function resetStock() {
     const confirmReset = confirm("Tem certeza que deseja resetar o estoque?")
 
     if (!confirmReset) return
 
     setProducts(initialProducts)
-
-    localStorage.setItem(
-      "adegaNatProducts",
-      JSON.stringify(initialProducts)
-    )
+    localStorage.setItem("adegaNatProducts", JSON.stringify(initialProducts))
   }
 
   function clearMonthlyOrders() {
@@ -178,7 +197,6 @@ R$ ${total}
     }
 
     saveOrder(newOrder)
-
     setSavedOrders(getSavedOrders())
 
     const url = `https://wa.me/5535984760977?text=${encodeURIComponent(
@@ -189,9 +207,7 @@ R$ ${total}
 
     setProducts(
       products.map((product) => {
-        const itemInCart = cart.find(
-          (item) => item.id === product.id
-        )
+        const itemInCart = cart.find((item) => item.id === product.id)
 
         if (itemInCart) {
           return {
@@ -227,23 +243,19 @@ R$ ${total}
           </h3>
 
           <div className="flex gap-3 overflow-x-auto pb-2">
-            {["Todos", "Whisky", "Cerveja", "Vodka"].map(
-              (category) => (
-                <button
-                  key={category}
-                  onClick={() =>
-                    setSelectedCategory(category)
-                  }
-                  className={`px-5 py-2 rounded-xl border transition ${
-                    selectedCategory === category
-                      ? "bg-amber-500 text-black border-amber-500"
-                      : "bg-zinc-900 border-zinc-800"
-                  }`}
-                >
-                  {category}
-                </button>
-              )
-            )}
+            {["Todos", "Whisky", "Cerveja", "Vodka"].map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-5 py-2 rounded-xl border transition ${
+                  selectedCategory === category
+                    ? "bg-amber-500 text-black border-amber-500"
+                    : "bg-zinc-900 border-zinc-800"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -268,6 +280,8 @@ R$ ${total}
         clearMonthlyOrders={clearMonthlyOrders}
         resetStock={resetStock}
         addProduct={addProduct}
+        updateProduct={updateProduct}
+        deleteProduct={deleteProduct}
       />
 
       <Cart

@@ -10,12 +10,16 @@ function AdminPanel({
   clearMonthlyOrders,
   resetStock,
   addProduct,
+  updateProduct,
+  deleteProduct,
 }) {
   const [name, setName] = useState("")
   const [category, setCategory] = useState("")
   const [price, setPrice] = useState("")
   const [stock, setStock] = useState("")
   const [image, setImage] = useState("")
+
+  const [editingProduct, setEditingProduct] = useState(null)
 
   function handleAddProduct() {
     if (!name || !category || !price || !stock || !image) {
@@ -36,6 +40,34 @@ function AdminPanel({
     setPrice("")
     setStock("")
     setImage("")
+  }
+
+  function startEditProduct(product) {
+    setEditingProduct({
+      ...product,
+      price: String(product.price),
+      stock: String(product.stock),
+    })
+  }
+
+  function cancelEditProduct() {
+    setEditingProduct(null)
+  }
+
+  function saveEditProduct() {
+    if (
+      !editingProduct.name ||
+      !editingProduct.category ||
+      !editingProduct.price ||
+      !editingProduct.stock ||
+      !editingProduct.image
+    ) {
+      alert("Preencha todos os campos do produto.")
+      return
+    }
+
+    updateProduct(editingProduct)
+    setEditingProduct(null)
   }
 
   if (!showAdmin) return null
@@ -144,42 +176,148 @@ function AdminPanel({
         </div>
 
         <h4 className="text-2xl font-bold mb-5">
-          Controle de Estoque
+          Produtos cadastrados
         </h4>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-10">
+        <div className="grid md:grid-cols-2 gap-4 mb-10">
           {products.map((product) => (
             <div
               key={product.id}
               className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5"
             >
-              <h5 className="font-bold text-lg">
-                {product.name}
-              </h5>
+              {editingProduct?.id === product.id ? (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={editingProduct.name}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        name: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3"
+                  />
 
-              <p className="text-zinc-400 mt-2">
-                Estoque atual: {product.stock}
-              </p>
+                  <input
+                    type="text"
+                    value={editingProduct.category}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        category: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3"
+                  />
 
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() =>
-                    updateStock(product.id, -1)
-                  }
-                  className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl font-bold"
-                >
-                  -1
-                </button>
+                  <input
+                    type="number"
+                    value={editingProduct.price}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        price: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3"
+                  />
 
-                <button
-                  onClick={() =>
-                    updateStock(product.id, 1)
-                  }
-                  className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl font-bold"
-                >
-                  +1
-                </button>
-              </div>
+                  <input
+                    type="number"
+                    value={editingProduct.stock}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        stock: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3"
+                  />
+
+                  <input
+                    type="text"
+                    value={editingProduct.image}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        image: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3"
+                  />
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={saveEditProduct}
+                      className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl font-bold"
+                    >
+                      Salvar
+                    </button>
+
+                    <button
+                      onClick={cancelEditProduct}
+                      className="bg-zinc-700 hover:bg-zinc-600 px-4 py-2 rounded-xl font-bold"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="h-40 w-full object-cover rounded-xl mb-4"
+                  />
+
+                  <h5 className="font-bold text-lg">
+                    {product.name}
+                  </h5>
+
+                  <p className="text-zinc-400 mt-1">
+                    Categoria: {product.category}
+                  </p>
+
+                  <p className="text-zinc-400">
+                    Preço: R$ {product.price}
+                  </p>
+
+                  <p className="text-zinc-400">
+                    Estoque atual: {product.stock}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <button
+                      onClick={() => updateStock(product.id, -1)}
+                      className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl font-bold"
+                    >
+                      -1
+                    </button>
+
+                    <button
+                      onClick={() => updateStock(product.id, 1)}
+                      className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl font-bold"
+                    >
+                      +1
+                    </button>
+
+                    <button
+                      onClick={() => startEditProduct(product)}
+                      className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-bold"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      onClick={() => deleteProduct(product.id)}
+                      className="bg-red-700 hover:bg-red-800 px-4 py-2 rounded-xl font-bold"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
