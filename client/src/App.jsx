@@ -24,9 +24,12 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false)
 
   const [showAdmin, setShowAdmin] = useState(false)
-  const [showAdminLogin, setShowAdminLogin] = useState(false)
-const [adminUser, setAdminUser] = useState("")
-const [adminPassword, setAdminPassword] = useState("")
+  const [showAdminLogin, setShowAdminLogin] = useState(
+  window.location.hash === "#admin"
+)
+  const [adminUser, setAdminUser] = useState("")
+  const [adminPassword, setAdminPassword] = useState("")
+
   const [savedOrders, setSavedOrders] = useState(getSavedOrders())
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -36,11 +39,7 @@ const [adminPassword, setAdminPassword] = useState("")
     localStorage.setItem("adegaNatProducts", JSON.stringify(products))
   }, [products])
 
- useEffect(() => {
-  if (window.location.hash === "#admin") {
-    setShowAdminLogin(true)
-  }
-}, [])
+  
 
   const monthlyRevenue = savedOrders.reduce(
     (acc, order) => acc + order.total,
@@ -59,6 +58,27 @@ const [adminPassword, setAdminPassword] = useState("")
 
     return matchesCategory && matchesSearch
   })
+
+  function handleAdminLogin(event) {
+    event.preventDefault()
+
+    if (adminUser === ADMIN_USER && adminPassword === ADMIN_PASSWORD) {
+      setShowAdmin(true)
+      setShowAdminLogin(false)
+      setAdminUser("")
+      setAdminPassword("")
+      return
+    }
+
+    alert("Usuário ou senha incorretos.")
+  }
+
+  function closeAdminLogin() {
+    setShowAdminLogin(false)
+    setAdminUser("")
+    setAdminPassword("")
+    window.location.hash = ""
+  }
 
   function addToCart(product) {
     if (product.stock <= 0 || !product.active) return
@@ -186,19 +206,6 @@ const [adminPassword, setAdminPassword] = useState("")
 
     setSavedOrders(updatedOrders)
   }
-  function handleAdminLogin(event) {
-  event.preventDefault()
-
-  if (adminUser === ADMIN_USER && adminPassword === ADMIN_PASSWORD) {
-    setShowAdmin(true)
-    setShowAdminLogin(false)
-    setAdminUser("")
-    setAdminPassword("")
-    return
-  }
-
-  alert("Usuário ou senha incorretos.")
-}
 
   if (showAdmin) {
     return (
@@ -220,61 +227,59 @@ const [adminPassword, setAdminPassword] = useState("")
   return (
     <div className="bg-black text-white min-h-screen overflow-x-hidden">
       {showAdminLogin && (
-  <div className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center px-6">
-    <form
-      onSubmit={handleAdminLogin}
-      className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl p-8 shadow-2xl"
-    >
-      <span className="text-amber-400 font-bold">
-        Acesso restrito
-      </span>
+        <div className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center px-6">
+          <form
+            onSubmit={handleAdminLogin}
+            className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl p-8 shadow-2xl"
+          >
+            <span className="text-amber-400 font-bold">
+              Acesso restrito
+            </span>
 
-      <h2 className="text-3xl font-black mt-3 mb-6">
-        Painel Administrativo
-      </h2>
+            <h2 className="text-3xl font-black mt-3 mb-6">
+              Painel Administrativo
+            </h2>
 
-      <div className="space-y-4">
-        <input
-          type="text"
-          placeholder="Usuário"
-          value={adminUser}
-          onChange={(e) => setAdminUser(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
-        />
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Usuário"
+                value={adminUser}
+                onChange={(e) => setAdminUser(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
+              />
 
-        <input
-          type="password"
-          placeholder="Senha"
-          value={adminPassword}
-          onChange={(e) => setAdminPassword(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
-        />
-      </div>
+              <input
+                type="password"
+                placeholder="Senha"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
+              />
+            </div>
 
-      <button
-        type="submit"
-        className="w-full bg-amber-500 hover:bg-amber-600 text-black font-black py-4 rounded-2xl mt-6"
-      >
-        Entrar no painel
-      </button>
+            <button
+              type="submit"
+              className="w-full bg-amber-500 hover:bg-amber-600 text-black font-black py-4 rounded-2xl mt-6"
+            >
+              Entrar no painel
+            </button>
 
-      <button
-        type="button"
-        onClick={() => {
-          setShowAdminLogin(false)
-          window.location.hash = ""
-        }}
-        className="w-full bg-zinc-800 hover:bg-zinc-700 font-bold py-4 rounded-2xl mt-3"
-      >
-        Voltar ao site
-      </button>
+            <button
+              type="button"
+              onClick={closeAdminLogin}
+              className="w-full bg-zinc-800 hover:bg-zinc-700 font-bold py-4 rounded-2xl mt-3"
+            >
+              Voltar ao site
+            </button>
 
-      <p className="text-zinc-500 text-sm mt-5 text-center">
-        Área exclusiva para administração do catálogo.
-      </p>
-    </form>
-  </div>
-)}
+            <p className="text-zinc-500 text-sm mt-5 text-center">
+              Área exclusiva para administração do catálogo.
+            </p>
+          </form>
+        </div>
+      )}
+
       <Header setIsCartOpen={setIsCartOpen} />
 
       <main>
