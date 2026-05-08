@@ -15,6 +15,8 @@ import {
   saveOrder,
 } from "./utils/orders"
 
+const ADMIN_PASSWORD = "nat123"
+
 function App() {
   const [products, setProducts] = useState(() => {
     const savedProducts = localStorage.getItem("adegaNatProducts")
@@ -44,6 +46,21 @@ function App() {
     selectedCategory === "Todos"
       ? products
       : products.filter((product) => product.category === selectedCategory)
+
+  function handleAdminAccess() {
+    if (showAdmin) {
+      setShowAdmin(false)
+      return
+    }
+
+    const password = prompt("Digite a senha do painel administrativo:")
+
+    if (password === ADMIN_PASSWORD) {
+      setShowAdmin(true)
+    } else {
+      alert("Senha incorreta.")
+    }
+  }
 
   function addProduct(newProduct) {
     const product = {
@@ -230,7 +247,7 @@ R$ ${total}
     <div className="bg-black text-white min-h-screen overflow-x-hidden">
       <Header
         showAdmin={showAdmin}
-        setShowAdmin={setShowAdmin}
+        handleAdminAccess={handleAdminAccess}
         setIsCartOpen={setIsCartOpen}
       />
 

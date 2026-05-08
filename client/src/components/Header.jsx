@@ -1,6 +1,6 @@
 function Header({
-  setShowAdmin,
   showAdmin,
+  handleAdminAccess,
   setIsCartOpen,
 }) {
   return (
@@ -18,10 +18,10 @@ function Header({
 
         <div className="flex gap-3">
           <button
-            onClick={() => setShowAdmin(!showAdmin)}
+            onClick={handleAdminAccess}
             className="hidden sm:block bg-zinc-900 hover:bg-zinc-800 px-5 py-3 rounded-xl font-bold transition border border-zinc-800"
           >
-            Painel Admin
+            {showAdmin ? "Fechar Admin" : "Painel Admin"}
           </button>
 
           <button
