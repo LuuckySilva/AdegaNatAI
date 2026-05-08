@@ -6,7 +6,7 @@ const initialProducts = [
     name: "Jack Daniels",
     category: "Whisky",
     price: 129,
-    stock: 3,
+    stock: 4,
     image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b",
   },
   {
@@ -14,7 +14,7 @@ const initialProducts = [
     name: "Heineken",
     category: "Cerveja",
     price: 12,
-    stock: 5,
+    stock: 8,
     image: "https://images.unsplash.com/photo-1608270586620-248524c67de9",
   },
   {
@@ -22,7 +22,7 @@ const initialProducts = [
     name: "Chivas Regal",
     category: "Whisky",
     price: 189,
-    stock: 1,
+    stock: 3,
     image: "https://images.unsplash.com/photo-1569529465841-dfecdab7503b",
   },
 ]
@@ -33,27 +33,46 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [customerName, setCustomerName] = useState("")
   const [address, setAddress] = useState("")
+  const [showAdmin, setShowAdmin] = useState(false)
+
+  const savedOrders =
+    JSON.parse(localStorage.getItem("adegaNatOrders"))?.orders || []
+
+  const monthlyRevenue = savedOrders.reduce(
+    (acc, order) => acc + order.total,
+    0
+  )
+
+  const total = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  )
 
   function addToCart(product) {
-  const productInCart = cart.find((item) => item.id === product.id)
+    if (product.stock === 0) {
+      alert(`${product.name} está esgotado.`)
+      return
+    }
 
-  if (productInCart && productInCart.quantity >= product.stock) {
-    alert(`Estoque máximo disponível para ${product.name}: ${product.stock}`)
-    return
-  }
+    const productInCart = cart.find((item) => item.id === product.id)
 
-  if (productInCart) {
-    setCart(
-      cart.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
+    if (productInCart && productInCart.quantity >= product.stock) {
+      alert(`Estoque máximo disponível para ${product.name}: ${product.stock}`)
+      return
+    }
+
+    if (productInCart) {
+      setCart(
+        cart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
       )
-    )
-  } else {
-    setCart([...cart, { ...product, quantity: 1 }])
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }])
+    }
   }
-}
 
   function getNextOrderNumber() {
     const currentMonth = new Date().getMonth()
@@ -80,11 +99,6 @@ function App() {
 
     return savedData.lastOrderNumber + 1
   }
-
-  const total = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  )
 
   function sendWhatsApp() {
     if (!customerName || !address || cart.length === 0) {
@@ -150,28 +164,28 @@ R$ ${total}
 
     localStorage.setItem("adegaNatOrders", JSON.stringify(updatedData))
 
-    const url = `https://wa.me/5535984128081?text=${encodeURIComponent(
+    const url = `https://wa.me/5535984760977?text=${encodeURIComponent(
       finalMessage
     )}`
 
     window.open(url, "_blank")
 
-setProducts(
-  products.map((product) => {
-    const itemInCart = cart.find((item) => item.id === product.id)
+    setProducts(
+      products.map((product) => {
+        const itemInCart = cart.find((item) => item.id === product.id)
 
-    if (itemInCart) {
-      return {
-        ...product,
-        stock: product.stock - itemInCart.quantity,
-      }
-    }
+        if (itemInCart) {
+          return {
+            ...product,
+            stock: product.stock - itemInCart.quantity,
+          }
+        }
 
-    return product
-  })
-)
+        return product
+      })
+    )
 
-setCart([])
+    setCart([])
     setCustomerName("")
     setAddress("")
     setIsCartOpen(false)
@@ -191,12 +205,21 @@ setCart([])
             <a href="#">Promoções</a>
           </nav>
 
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="bg-amber-500 hover:bg-amber-600 px-5 py-3 rounded-xl font-bold transition"
-          >
-            Fazer Pedido
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowAdmin(!showAdmin)}
+              className="hidden sm:block bg-zinc-900 hover:bg-zinc-800 px-5 py-3 rounded-xl font-bold transition border border-zinc-800"
+            >
+              Painel Admin
+            </button>
+
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="bg-amber-500 hover:bg-amber-600 px-5 py-3 rounded-xl font-bold transition"
+            >
+              Fazer Pedido
+            </button>
+          </div>
         </div>
       </header>
 
@@ -272,9 +295,13 @@ setCart([])
                   {product.category}
                 </span>
 
+                <h4 className="text-2xl font-bold mt-2">
+                  {product.name}
+                </h4>
+
                 <p className="text-zinc-400 text-sm mt-2">
-  Estoque: {product.stock} unidades
-</p>
+                  Estoque: {product.stock} unidades
+                </p>
 
                 <div className="flex items-center justify-between mt-6">
                   <span className="text-3xl font-black text-amber-400">
@@ -282,24 +309,105 @@ setCart([])
                   </span>
 
                   <button
-  onClick={() => addToCart(product)}
-  disabled={product.stock === 0}
-  className={`px-5 py-3 rounded-xl font-bold transition ${
-    product.stock === 0
-      ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-      : "bg-amber-500 hover:bg-amber-600"
-  }`}
->
-  {product.stock === 0 ? "Esgotado" : "Adicionar"}
-</button>
-                    Adicionar
-                  
+                    onClick={() => addToCart(product)}
+                    disabled={product.stock === 0}
+                    className={`px-5 py-3 rounded-xl font-bold transition ${
+                      product.stock === 0
+                        ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                        : "bg-amber-500 hover:bg-amber-600"
+                    }`}
+                  >
+                    {product.stock === 0 ? "Esgotado" : "Adicionar"}
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </section>
+
+      {showAdmin && (
+        <section className="max-w-7xl mx-auto px-6 pb-24">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-3xl font-black text-amber-400">
+                Painel Administrativo
+              </h3>
+
+              <button
+                onClick={() => setShowAdmin(false)}
+                className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl font-bold"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+                <p className="text-zinc-400">Pedidos do mês</p>
+                <strong className="text-4xl text-white">
+                  {savedOrders.length}
+                </strong>
+              </div>
+
+              <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+                <p className="text-zinc-400">Faturamento do mês</p>
+                <strong className="text-4xl text-amber-400">
+                  R$ {monthlyRevenue}
+                </strong>
+              </div>
+            </div>
+
+            <h4 className="text-2xl font-bold mb-5">
+              Últimos pedidos
+            </h4>
+
+            <div className="space-y-4">
+              {savedOrders.length === 0 && (
+                <p className="text-zinc-400">
+                  Nenhum pedido registrado ainda.
+                </p>
+              )}
+
+              {savedOrders.map((order) => (
+                <div
+                  key={order.number}
+                  className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                    <div>
+                      <p className="text-amber-400 font-bold">
+                        Pedido Nº {order.number}
+                      </p>
+
+                      <h5 className="text-xl font-bold">
+                        {order.customerName}
+                      </h5>
+                    </div>
+
+                    <strong className="text-2xl text-amber-400">
+                      R$ {order.total}
+                    </strong>
+                  </div>
+
+                  <p className="text-zinc-400 mb-3">
+                    📍 {order.address}
+                  </p>
+
+                  <div className="space-y-1">
+                    {order.items.map((item) => (
+                      <p key={item.id} className="text-zinc-300">
+                        • {item.name} ({item.quantity}x) - R${" "}
+                        {item.price * item.quantity}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <button
         onClick={() => setIsCartOpen(!isCartOpen)}
