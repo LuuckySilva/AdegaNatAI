@@ -415,13 +415,13 @@ function AdminPanel({
               .reverse()
               .map((order) => (
                 <div
-                  key={order.number}
+                  key={order.id}
                   className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
                     <div>
                       <p className="text-amber-400 font-bold">
-                        Pedido Nº {order.number}
+                        Pedido Nº {order.id}
                       </p>
 
                       <h3 className="text-2xl font-black">
@@ -436,15 +436,15 @@ function AdminPanel({
 
                   <div className="grid md:grid-cols-2 gap-4 text-zinc-300 mb-6">
                     <p>📞 {order.customerPhone}</p>
-                    <p>📍 {order.customerAddress}</p>
+                    <p>📍 {order.address}</p>
                     <p>💳 {order.paymentMethod}</p>
-                    <p>🚚 Taxa: R$ {order.deliveryFee || 0}</p>
-                    <p>📝 {order.observation || "Sem observação"}</p>
+                    <p>🚚 Taxa: R$ {order.deliveryTax || 0}</p>
+                    <p>📝 {order.notes || "Sem observação"}</p>
                     <p>📅 {order.createdAt}</p>
                   </div>
 
                   <div className="border-t border-zinc-800 pt-4 mb-6">
-                    {order.items.map((item) => (
+                    {order.products.map((item) => (
                       <p key={item.id} className="text-zinc-300">
                         • {item.name} ({item.quantity}x) - R${" "}
                         {item.price * item.quantity}
@@ -456,7 +456,7 @@ function AdminPanel({
                     <select
                       value={order.status || "Novo"}
                       onChange={(e) =>
-                        updateOrderStatus(order.number, e.target.value)
+                        updateOrderStatus(order.id, e.target.value)
                       }
                       className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
                     >
@@ -478,7 +478,7 @@ function AdminPanel({
                     </a>
 
                     <button
-                      onClick={() => deleteOrder(order.number)}
+                      onClick={() => deleteOrder(order.id)}
                       className="bg-red-500 hover:bg-red-600 px-4 py-3 rounded-xl font-bold"
                     >
                       Excluir pedido

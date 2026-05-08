@@ -7,8 +7,6 @@ import Cart from "./components/Cart"
 import AdminPanel from "./components/AdminPanel"
 import StoreInfo from "./components/StoreInfo"
 
-import { getSavedOrders } from "./utils/orders"
-
 const API_URL = "http://localhost:3000"
 
 const ADMIN_USER = "admin"
@@ -29,16 +27,20 @@ function App() {
   const [adminUser, setAdminUser] = useState("")
   const [adminPassword, setAdminPassword] = useState("")
 
-  const [savedOrders, setSavedOrders] = useState(getSavedOrders())
+  const [savedOrders, setSavedOrders] = useState([])
 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Todos")
+
+  useEffect(() => {
+    fetchProducts()
+    fetchOrders()
+  }, [])
 
   async function fetchProducts() {
     try {
       const response = await fetch(`${API_URL}/products`)
       const data = await response.json()
-
       setProducts(data)
     } catch (error) {
       console.error("Erro ao buscar produtos:", error)
@@ -48,20 +50,24 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
+  async function fetchOrders() {
+    try {
+      const response = await fetch(`${API_URL}/orders`)
+      const data = await response.json()
+      setSavedOrders(data)
+    } catch (error) {
+      console.error("Erro ao buscar pedidos:", error)
+    }
+  }
 
   const monthlyRevenue = savedOrders.reduce(
-    (acc, order) => acc + order.total,
+    (acc, order) => acc + Number(order.total || 0),
     0
   )
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
-      selectedCategory === "Todos"
-        ? true
-        : product.category === selectedCategory
+      selectedCategory === "Todos" ? true : product.category === selectedCategory
 
     const matchesSearch = product.name
       .toLowerCase()
@@ -124,7 +130,6 @@ function App() {
       })
 
       const createdProduct = await response.json()
-
       setProducts([...products, createdProduct])
     } catch (error) {
       console.error("Erro ao adicionar produto:", error)
@@ -186,62 +191,46 @@ function App() {
     await updateProduct(updatedProduct)
   }
 
-  function updateOrderStatus(orderNumber, newStatus) {
-    const currentMonth = new Date().getMonth()
-    const currentYear = new Date().getFullYear()
-
-    const savedData = JSON.parse(localStorage.getItem("adegaNatOrders")) || {
-      month: currentMonth,
-      year: currentYear,
-      lastOrderNumber: 0,
-      orders: [],
-    }
-
-    const updatedOrders = savedData.orders.map((order) =>
-      order.number === orderNumber
-        ? { ...order, status: newStatus }
-        : order
-    )
-
-    localStorage.setItem(
-      "adegaNatOrders",
-      JSON.stringify({
-        ...savedData,
-        orders: updatedOrders,
+  async function updateOrderStatus(orderId, newStatus) {
+    try {
+      const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: newStatus,
+        }),
       })
-    )
 
-    setSavedOrders(updatedOrders)
+      const updatedOrder = await response.json()
+
+      setSavedOrders(
+        savedOrders.map((order) =>
+          order.id === updatedOrder.id ? updatedOrder : order
+        )
+      )
+    } catch (error) {
+      console.error("Erro ao atualizar pedido:", error)
+      alert("Erro ao atualizar status do pedido.")
+    }
   }
 
-  function deleteOrder(orderNumber) {
+  async function deleteOrder(orderId) {
     const confirmDelete = confirm("Deseja excluir este pedido?")
 
     if (!confirmDelete) return
 
-    const currentMonth = new Date().getMonth()
-    const currentYear = new Date().getFullYear()
-
-    const savedData = JSON.parse(localStorage.getItem("adegaNatOrders")) || {
-      month: currentMonth,
-      year: currentYear,
-      lastOrderNumber: 0,
-      orders: [],
-    }
-
-    const updatedOrders = savedData.orders.filter(
-      (order) => order.number !== orderNumber
-    )
-
-    localStorage.setItem(
-      "adegaNatOrders",
-      JSON.stringify({
-        ...savedData,
-        orders: updatedOrders,
+    try {
+      await fetch(`${API_URL}/orders/${orderId}`, {
+        method: "DELETE",
       })
-    )
 
-    setSavedOrders(updatedOrders)
+      setSavedOrders(savedOrders.filter((order) => order.id !== orderId))
+    } catch (error) {
+      console.error("Erro ao excluir pedido:", error)
+      alert("Erro ao excluir pedido.")
+    }
   }
 
   if (showAdmin) {
@@ -269,9 +258,7 @@ function App() {
             onSubmit={handleAdminLogin}
             className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl p-8 shadow-2xl"
           >
-            <span className="text-amber-400 font-bold">
-              Acesso restrito
-            </span>
+            <span className="text-amber-400 font-bold">Acesso restrito</span>
 
             <h2 className="text-3xl font-black mt-3 mb-6">
               Painel Administrativo
@@ -327,9 +314,7 @@ function App() {
         <section id="catalogo" className="max-w-7xl mx-auto px-6 py-20">
           <div className="flex flex-col gap-6 mb-12">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <h3 className="text-3xl sm:text-4xl font-black">
-                Catálogo
-              </h3>
+              <h3 className="text-3xl sm:text-4xl font-black">Catálogo</h3>
 
               <input
                 type="text"
