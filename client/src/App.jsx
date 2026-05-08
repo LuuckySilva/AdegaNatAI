@@ -7,26 +7,25 @@ import Cart from "./components/Cart"
 import AdminPanel from "./components/AdminPanel"
 import StoreInfo from "./components/StoreInfo"
 
-import initialProducts from "./data/products"
-
 import { getSavedOrders } from "./utils/orders"
+
+const API_URL = "http://localhost:3000"
 
 const ADMIN_USER = "admin"
 const ADMIN_PASSWORD = "nat123"
 
 function App() {
-  const [products, setProducts] = useState(() => {
-    const savedProducts = localStorage.getItem("adegaNatProducts")
-    return savedProducts ? JSON.parse(savedProducts) : initialProducts
-  })
+  const [products, setProducts] = useState([])
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
 
   const [showAdmin, setShowAdmin] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(
-  window.location.hash === "#admin"
-)
+    window.location.hash === "#admin"
+  )
+
   const [adminUser, setAdminUser] = useState("")
   const [adminPassword, setAdminPassword] = useState("")
 
@@ -35,11 +34,23 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Todos")
 
-  useEffect(() => {
-    localStorage.setItem("adegaNatProducts", JSON.stringify(products))
-  }, [products])
+  async function fetchProducts() {
+    try {
+      const response = await fetch(`${API_URL}/products`)
+      const data = await response.json()
 
-  
+      setProducts(data)
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error)
+      alert("Erro ao carregar produtos do servidor.")
+    } finally {
+      setIsLoadingProducts(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
 
   const monthlyRevenue = savedOrders.reduce(
     (acc, order) => acc + order.total,
@@ -102,51 +113,77 @@ function App() {
     setIsCartOpen(true)
   }
 
-  function addProduct(newProduct) {
-    const product = {
-      ...newProduct,
-      id: Date.now(),
-      price: Number(newProduct.price),
-      stock: Number(newProduct.stock),
+  async function addProduct(newProduct) {
+    try {
+      const response = await fetch(`${API_URL}/products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newProduct),
+      })
+
+      const createdProduct = await response.json()
+
+      setProducts([...products, createdProduct])
+    } catch (error) {
+      console.error("Erro ao adicionar produto:", error)
+      alert("Erro ao adicionar produto.")
     }
-
-    setProducts([...products, product])
   }
 
-  function updateProduct(updatedProduct) {
-    setProducts(
-      products.map((product) =>
-        product.id === updatedProduct.id
-          ? {
-              ...updatedProduct,
-              price: Number(updatedProduct.price),
-              stock: Number(updatedProduct.stock),
-            }
-          : product
+  async function updateProduct(updatedProduct) {
+    try {
+      const response = await fetch(`${API_URL}/products/${updatedProduct.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedProduct),
+      })
+
+      const productFromApi = await response.json()
+
+      setProducts(
+        products.map((product) =>
+          product.id === productFromApi.id ? productFromApi : product
+        )
       )
-    )
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error)
+      alert("Erro ao atualizar produto.")
+    }
   }
 
-  function deleteProduct(productId) {
+  async function deleteProduct(productId) {
     const confirmDelete = confirm("Deseja remover este produto?")
 
     if (!confirmDelete) return
 
-    setProducts(products.filter((product) => product.id !== productId))
-    setCart(cart.filter((item) => item.id !== productId))
+    try {
+      await fetch(`${API_URL}/products/${productId}`, {
+        method: "DELETE",
+      })
+
+      setProducts(products.filter((product) => product.id !== productId))
+      setCart(cart.filter((item) => item.id !== productId))
+    } catch (error) {
+      console.error("Erro ao remover produto:", error)
+      alert("Erro ao remover produto.")
+    }
   }
 
-  function updateStock(productId, amount) {
-    setProducts(
-      products.map((product) =>
-        product.id === productId
-          ? {
-              ...product,
-              stock: Math.max(0, product.stock + amount),
-            }
-          : product
-      )
-    )
+  async function updateStock(productId, amount) {
+    const product = products.find((item) => item.id === productId)
+
+    if (!product) return
+
+    const updatedProduct = {
+      ...product,
+      stock: Math.max(0, product.stock + amount),
+    }
+
+    await updateProduct(updatedProduct)
   }
 
   function updateOrderStatus(orderNumber, newStatus) {
@@ -320,15 +357,21 @@ function App() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                addToCart={addToCart}
-              />
-            ))}
-          </div>
+          {isLoadingProducts ? (
+            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-10 text-center text-zinc-400">
+              Carregando produtos...
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  addToCart={addToCart}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         <section id="localizacao">
