@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 function AdminPanel({
   showAdmin,
   setShowAdmin,
@@ -7,7 +9,35 @@ function AdminPanel({
   updateStock,
   clearMonthlyOrders,
   resetStock,
+  addProduct,
 }) {
+  const [name, setName] = useState("")
+  const [category, setCategory] = useState("")
+  const [price, setPrice] = useState("")
+  const [stock, setStock] = useState("")
+  const [image, setImage] = useState("")
+
+  function handleAddProduct() {
+    if (!name || !category || !price || !stock || !image) {
+      alert("Preencha todos os campos.")
+      return
+    }
+
+    addProduct({
+      name,
+      category,
+      price,
+      stock,
+      image,
+    })
+
+    setName("")
+    setCategory("")
+    setPrice("")
+    setStock("")
+    setImage("")
+  }
+
   if (!showAdmin) return null
 
   return (
@@ -60,7 +90,62 @@ function AdminPanel({
           </div>
         </div>
 
-        <h4 className="text-2xl font-bold mb-5">Controle de Estoque</h4>
+        <h4 className="text-2xl font-bold mb-5">
+          Adicionar Produto
+        </h4>
+
+        <div className="grid md:grid-cols-2 gap-4 mb-10">
+          <input
+            type="text"
+            placeholder="Nome do produto"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+          />
+
+          <input
+            type="text"
+            placeholder="Categoria"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+          />
+
+          <input
+            type="number"
+            placeholder="Preço"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+          />
+
+          <input
+            type="number"
+            placeholder="Estoque"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+          />
+
+          <input
+            type="text"
+            placeholder="URL da imagem"
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 md:col-span-2"
+          />
+
+          <button
+            onClick={handleAddProduct}
+            className="bg-amber-500 hover:bg-amber-600 text-black font-bold py-4 rounded-xl md:col-span-2"
+          >
+            Adicionar Produto
+          </button>
+        </div>
+
+        <h4 className="text-2xl font-bold mb-5">
+          Controle de Estoque
+        </h4>
 
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {products.map((product) => (
@@ -68,7 +153,9 @@ function AdminPanel({
               key={product.id}
               className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5"
             >
-              <h5 className="font-bold text-lg">{product.name}</h5>
+              <h5 className="font-bold text-lg">
+                {product.name}
+              </h5>
 
               <p className="text-zinc-400 mt-2">
                 Estoque atual: {product.stock}
@@ -76,62 +163,22 @@ function AdminPanel({
 
               <div className="flex gap-2 mt-4">
                 <button
-                  onClick={() => updateStock(product.id, -1)}
+                  onClick={() =>
+                    updateStock(product.id, -1)
+                  }
                   className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl font-bold"
                 >
                   -1
                 </button>
 
                 <button
-                  onClick={() => updateStock(product.id, 1)}
+                  onClick={() =>
+                    updateStock(product.id, 1)
+                  }
                   className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl font-bold"
                 >
                   +1
                 </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <h4 className="text-2xl font-bold mb-5">Últimos pedidos</h4>
-
-        <div className="space-y-4">
-          {savedOrders.length === 0 && (
-            <p className="text-zinc-400">
-              Nenhum pedido registrado ainda.
-            </p>
-          )}
-
-          {savedOrders.map((order) => (
-            <div
-              key={order.number}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
-                <div>
-                  <p className="text-amber-400 font-bold">
-                    Pedido Nº {order.number}
-                  </p>
-
-                  <h5 className="text-xl font-bold">
-                    {order.customerName}
-                  </h5>
-                </div>
-
-                <strong className="text-2xl text-amber-400">
-                  R$ {order.total}
-                </strong>
-              </div>
-
-              <p className="text-zinc-400 mb-3">📍 {order.address}</p>
-
-              <div className="space-y-1">
-                {order.items.map((item) => (
-                  <p key={item.id} className="text-zinc-300">
-                    • {item.name} ({item.quantity}x) - R${" "}
-                    {item.price * item.quantity}
-                  </p>
-                ))}
               </div>
             </div>
           ))}

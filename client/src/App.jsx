@@ -45,17 +45,34 @@ function App() {
       ? products
       : products.filter((product) => product.category === selectedCategory)
 
+  function addProduct(newProduct) {
+    const product = {
+      ...newProduct,
+      id: Date.now(),
+      price: Number(newProduct.price),
+      stock: Number(newProduct.stock),
+    }
+
+    setProducts([...products, product])
+  }
+
   function resetStock() {
     const confirmReset = confirm("Tem certeza que deseja resetar o estoque?")
 
     if (!confirmReset) return
 
     setProducts(initialProducts)
-    localStorage.setItem("adegaNatProducts", JSON.stringify(initialProducts))
+
+    localStorage.setItem(
+      "adegaNatProducts",
+      JSON.stringify(initialProducts)
+    )
   }
 
   function clearMonthlyOrders() {
-    const confirmClear = confirm("Tem certeza que deseja limpar os pedidos do mês?")
+    const confirmClear = confirm(
+      "Tem certeza que deseja limpar os pedidos do mês?"
+    )
 
     if (!confirmClear) return
 
@@ -79,7 +96,10 @@ function App() {
     setProducts(
       products.map((product) =>
         product.id === productId
-          ? { ...product, stock: Math.max(0, product.stock + amount) }
+          ? {
+              ...product,
+              stock: Math.max(0, product.stock + amount),
+            }
           : product
       )
     )
@@ -94,7 +114,9 @@ function App() {
     const productInCart = cart.find((item) => item.id === product.id)
 
     if (productInCart && productInCart.quantity >= product.stock) {
-      alert(`Estoque máximo disponível para ${product.name}: ${product.stock}`)
+      alert(
+        `Estoque máximo disponível para ${product.name}: ${product.stock}`
+      )
       return
     }
 
@@ -156,6 +178,7 @@ R$ ${total}
     }
 
     saveOrder(newOrder)
+
     setSavedOrders(getSavedOrders())
 
     const url = `https://wa.me/5535984760977?text=${encodeURIComponent(
@@ -166,7 +189,9 @@ R$ ${total}
 
     setProducts(
       products.map((product) => {
-        const itemInCart = cart.find((item) => item.id === product.id)
+        const itemInCart = cart.find(
+          (item) => item.id === product.id
+        )
 
         if (itemInCart) {
           return {
@@ -202,19 +227,23 @@ R$ ${total}
           </h3>
 
           <div className="flex gap-3 overflow-x-auto pb-2">
-            {["Todos", "Whisky", "Cerveja", "Vodka"].map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-5 py-2 rounded-xl border transition ${
-                  selectedCategory === category
-                    ? "bg-amber-500 text-black border-amber-500"
-                    : "bg-zinc-900 border-zinc-800"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+            {["Todos", "Whisky", "Cerveja", "Vodka"].map(
+              (category) => (
+                <button
+                  key={category}
+                  onClick={() =>
+                    setSelectedCategory(category)
+                  }
+                  className={`px-5 py-2 rounded-xl border transition ${
+                    selectedCategory === category
+                      ? "bg-amber-500 text-black border-amber-500"
+                      : "bg-zinc-900 border-zinc-800"
+                  }`}
+                >
+                  {category}
+                </button>
+              )
+            )}
           </div>
         </div>
 
@@ -238,6 +267,7 @@ R$ ${total}
         updateStock={updateStock}
         clearMonthlyOrders={clearMonthlyOrders}
         resetStock={resetStock}
+        addProduct={addProduct}
       />
 
       <Cart
