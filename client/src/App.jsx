@@ -22,20 +22,30 @@ function App() {
     return savedProducts ? JSON.parse(savedProducts) : initialProducts
   })
 
+  const [searchTerm, setSearchTerm] = useState("")
+  const [adminPassword, setAdminPassword] = useState("")
+  const [showLoginModal, setShowLoginModal] = useState(false)
+
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
+
   const [customerName, setCustomerName] = useState("")
   const [phone, setPhone] = useState("")
   const [address, setAddress] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("")
   const [deliveryFee, setDeliveryFee] = useState("")
   const [observation, setObservation] = useState("")
+
   const [isAdult, setIsAdult] = useState(false)
+
   const [hasConfirmedAge, setHasConfirmedAge] = useState(
     localStorage.getItem("adegaNatAgeConfirmed") === "true"
   )
+
   const [showAdmin, setShowAdmin] = useState(false)
+
   const [savedOrders, setSavedOrders] = useState(getSavedOrders())
+
   const [selectedCategory, setSelectedCategory] = useState("Todos")
 
   useEffect(() => {
@@ -48,6 +58,7 @@ function App() {
   )
 
   const deliveryValue = Number(deliveryFee) || 0
+
   const total = productsTotal + deliveryValue
 
   const monthlyRevenue = savedOrders.reduce(
@@ -55,10 +66,18 @@ function App() {
     0
   )
 
-  const filteredProducts =
-    selectedCategory === "Todos"
-      ? products
-      : products.filter((product) => product.category === selectedCategory)
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory =
+      selectedCategory === "Todos"
+        ? true
+        : product.category === selectedCategory
+
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+
+    return matchesCategory && matchesSearch
+  })
 
   function confirmAgeAccess() {
     localStorage.setItem("adegaNatAgeConfirmed", "true")
@@ -66,15 +85,14 @@ function App() {
   }
 
   function handleAdminAccess() {
-    if (showAdmin) {
-      setShowAdmin(false)
-      return
-    }
+    setShowLoginModal(true)
+  }
 
-    const password = prompt("Digite a senha do painel administrativo:")
-
-    if (password === ADMIN_PASSWORD) {
+  function handleAdminLogin() {
+    if (adminPassword === ADMIN_PASSWORD) {
       setShowAdmin(true)
+      setShowLoginModal(false)
+      setAdminPassword("")
     } else {
       alert("Senha incorreta.")
     }
@@ -107,22 +125,54 @@ function App() {
 
   function deleteProduct(productId) {
     const confirmDelete = confirm("Tem certeza que deseja excluir este produto?")
+
     if (!confirmDelete) return
 
     setProducts(products.filter((product) => product.id !== productId))
-    setCart(cart.filter((item) => item.id !== productId))
+  }
+
+  function deleteOrder(orderNumber) {
+    const confirmDelete = confirm("Deseja excluir este pedido?")
+
+    if (!confirmDelete) return
+
+    const currentMonth = new Date().getMonth()
+    const currentYear = new Date().getFullYear()
+
+    const savedData =
+      JSON.parse(localStorage.getItem("adegaNatOrders")) || {
+        month: currentMonth,
+        year: currentYear,
+        lastOrderNumber: 0,
+        orders: [],
+      }
+
+    const updatedOrders = savedData.orders.filter(
+      (order) => order.number !== orderNumber
+    )
+
+    localStorage.setItem(
+      "adegaNatOrders",
+      JSON.stringify({
+        ...savedData,
+        orders: updatedOrders,
+      })
+    )
+
+    setSavedOrders(updatedOrders)
   }
 
   function updateOrderStatus(orderNumber, newStatus) {
     const currentMonth = new Date().getMonth()
     const currentYear = new Date().getFullYear()
 
-    const savedData = JSON.parse(localStorage.getItem("adegaNatOrders")) || {
-      month: currentMonth,
-      year: currentYear,
-      lastOrderNumber: 0,
-      orders: [],
-    }
+    const savedData =
+      JSON.parse(localStorage.getItem("adegaNatOrders")) || {
+        month: currentMonth,
+        year: currentYear,
+        lastOrderNumber: 0,
+        orders: [],
+      }
 
     const updatedOrders = savedData.orders.map((order) =>
       order.number === orderNumber
@@ -142,20 +192,11 @@ function App() {
   }
 
   function resetStock() {
-    const confirmReset = confirm("Tem certeza que deseja resetar o estoque?")
-    if (!confirmReset) return
-
     setProducts(initialProducts)
     localStorage.setItem("adegaNatProducts", JSON.stringify(initialProducts))
   }
 
   function clearMonthlyOrders() {
-    const confirmClear = confirm(
-      "Tem certeza que deseja limpar os pedidos do mês?"
-    )
-
-    if (!confirmClear) return
-
     const currentMonth = new Date().getMonth()
     const currentYear = new Date().getFullYear()
 
@@ -187,14 +228,12 @@ function App() {
 
   function addToCart(product) {
     if (product.stock === 0) {
-      alert(`${product.name} está esgotado.`)
       return
     }
 
     const productInCart = cart.find((item) => item.id === product.id)
 
     if (productInCart && productInCart.quantity >= product.stock) {
-      alert(`Estoque máximo disponível para ${product.name}: ${product.stock}`)
       return
     }
 
@@ -219,14 +258,12 @@ function App() {
       !paymentMethod ||
       cart.length === 0
     ) {
-      alert(
-        "Preencha nome, telefone, endereço, pagamento e adicione pelo menos 1 produto."
-      )
+      alert("Preencha os dados corretamente.")
       return
     }
 
     if (!isAdult) {
-      alert("Confirme que o cliente tem 18 anos ou mais para continuar.")
+      alert("Confirme a maioridade.")
       return
     }
 
@@ -245,31 +282,20 @@ function App() {
 🍷 NOVO PEDIDO - ADEGA NAT AI
 
 📦 Pedido Nº: ${orderNumber}
-📌 Status: Novo
 
-👤 Cliente:
-${customerName}
+👤 ${customerName}
+📞 ${phone}
 
-📞 Telefone:
-${phone}
+📍 ${address}
 
-🔞 Maior de idade:
-Sim, cliente confirmou ser maior de 18 anos.
+💳 ${paymentMethod}
 
-📍 Endereço:
-${address}
+🚚 Taxa: R$ ${deliveryValue}
 
-💳 Pagamento:
-${paymentMethod}
+📝 ${observation || "Sem observação"}
 
 🛒 Itens:
 ${itemsMessage}
-
-🚚 Taxa de entrega:
-R$ ${deliveryValue}
-
-📝 Observação:
-${observation || "Nenhuma"}
 
 💰 Total:
 R$ ${total}
@@ -286,12 +312,12 @@ R$ ${total}
       status: "Novo",
       isAdult,
       items: cart,
-      productsTotal,
       total,
       date: new Date().toISOString(),
     }
 
     saveOrder(newOrder)
+
     setSavedOrders(getSavedOrders())
 
     const url = `https://wa.me/5535984760977?text=${encodeURIComponent(
@@ -302,7 +328,9 @@ R$ ${total}
 
     setProducts(
       products.map((product) => {
-        const itemInCart = cart.find((item) => item.id === product.id)
+        const itemInCart = cart.find(
+          (item) => item.id === product.id
+        )
 
         if (itemInCart) {
           return {
@@ -335,16 +363,46 @@ R$ ${total}
               Confirmação de idade
             </h2>
 
-            <p className="text-zinc-300 mb-6">
-              Este site contém produtos destinados apenas para maiores de 18 anos.
-            </p>
-
             <button
               onClick={confirmAgeAccess}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-4 rounded-2xl"
+              className="w-full bg-amber-500 py-4 rounded-2xl font-bold text-black"
             >
               Tenho 18 anos ou mais
             </button>
+          </div>
+        </div>
+      )}
+
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center px-6">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md">
+            <h2 className="text-3xl font-black text-amber-400 mb-6">
+              Painel Admin
+            </h2>
+
+            <input
+              type="password"
+              placeholder="Senha"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-4 mb-4"
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleAdminLogin}
+                className="flex-1 bg-amber-500 hover:bg-amber-600 py-4 rounded-xl text-black font-bold"
+              >
+                Entrar
+              </button>
+
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 py-4 rounded-xl font-bold"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -358,10 +416,20 @@ R$ ${total}
       <Hero />
 
       <section className="max-w-7xl mx-auto px-6 py-24">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
-          <h3 className="text-3xl sm:text-4xl font-black">
-            Destaques da Adega
-          </h3>
+        <div className="flex flex-col gap-6 mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <h3 className="text-3xl sm:text-4xl font-black">
+              Destaques da Adega
+            </h3>
+
+            <input
+              type="text"
+              placeholder="Buscar produto..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 lg:w-80"
+            />
+          </div>
 
           <div className="flex gap-3 overflow-x-auto pb-2">
             {["Todos", "Whisky", "Cerveja", "Vodka"].map((category) => (
@@ -404,6 +472,7 @@ R$ ${total}
         updateProduct={updateProduct}
         deleteProduct={deleteProduct}
         updateOrderStatus={updateOrderStatus}
+        deleteOrder={deleteOrder}
       />
 
       <Cart
