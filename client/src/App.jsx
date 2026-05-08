@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-const products = [
+const initialProducts = [
   {
     id: 1,
     name: "Jack Daniels",
@@ -28,6 +28,7 @@ const products = [
 ]
 
 function App() {
+  const [products, setProducts] = useState(initialProducts)
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [customerName, setCustomerName] = useState("")
@@ -155,7 +156,22 @@ R$ ${total}
 
     window.open(url, "_blank")
 
-    setCart([])
+setProducts(
+  products.map((product) => {
+    const itemInCart = cart.find((item) => item.id === product.id)
+
+    if (itemInCart) {
+      return {
+        ...product,
+        stock: product.stock - itemInCart.quantity,
+      }
+    }
+
+    return product
+  })
+)
+
+setCart([])
     setCustomerName("")
     setAddress("")
     setIsCartOpen(false)
@@ -267,18 +283,14 @@ R$ ${total}
 
                   <button
   onClick={() => addToCart(product)}
-  disabled={
-    cart.find((item) => item.id === product.id)?.quantity >= product.stock
-  }
+  disabled={product.stock === 0}
   className={`px-5 py-3 rounded-xl font-bold transition ${
-    cart.find((item) => item.id === product.id)?.quantity >= product.stock
+    product.stock === 0
       ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
       : "bg-amber-500 hover:bg-amber-600"
   }`}
 >
-  {cart.find((item) => item.id === product.id)?.quantity >= product.stock
-    ? "Limite"
-    : "Adicionar"}
+  {product.stock === 0 ? "Esgotado" : "Adicionar"}
 </button>
                     Adicionar
                   
