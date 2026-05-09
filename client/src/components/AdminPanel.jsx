@@ -173,48 +173,132 @@ function AdminPanel({
         </div>
 
         {activeTab === "Visão Geral" && (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-              <span className="text-zinc-400">Produtos cadastrados</span>
-              <h3 className="text-5xl font-black mt-4">{totalProducts}</h3>
-            </div>
+  <div className="space-y-8">
+    <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Pedidos totais</span>
+        <h3 className="text-5xl font-black mt-4 text-blue-400">
+          {savedOrders.length}
+        </h3>
+      </div>
 
-            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-              <span className="text-zinc-400">Produtos ativos</span>
-              <h3 className="text-5xl font-black mt-4 text-green-400">
-                {activeProducts}
-              </h3>
-            </div>
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Faturamento</span>
+        <h3 className="text-4xl font-black mt-4 text-green-400">
+          R$ {monthlyRevenue.toFixed(2).replace(".", ",")}
+        </h3>
+      </div>
 
-            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-              <span className="text-zinc-400">Promoções ativas</span>
-              <h3 className="text-5xl font-black mt-4 text-amber-400">
-                {promotions}
-              </h3>
-            </div>
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Ticket médio</span>
+        <h3 className="text-4xl font-black mt-4 text-amber-400">
+          R${" "}
+          {savedOrders.length > 0
+            ? (monthlyRevenue / savedOrders.length)
+                .toFixed(2)
+                .replace(".", ",")
+            : "0,00"}
+        </h3>
+      </div>
 
-            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-              <span className="text-zinc-400">Produtos sem estoque</span>
-              <h3 className="text-5xl font-black mt-4 text-red-400">
-                {outOfStock}
-              </h3>
-            </div>
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Produtos ativos</span>
+        <h3 className="text-5xl font-black mt-4 text-white">
+          {activeProducts}
+        </h3>
+      </div>
+    </div>
 
-            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-              <span className="text-zinc-400">Pedidos do mês</span>
-              <h3 className="text-5xl font-black mt-4 text-blue-400">
-                {savedOrders.length}
-              </h3>
-            </div>
+    <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Produtos cadastrados</span>
+        <h3 className="text-5xl font-black mt-4">
+          {totalProducts}
+        </h3>
+      </div>
 
-            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-              <span className="text-zinc-400">Faturamento mensal</span>
-              <h3 className="text-4xl font-black mt-4 text-green-400">
-                R$ {monthlyRevenue}
-              </h3>
-            </div>
-          </div>
-        )}
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Promoções ativas</span>
+        <h3 className="text-5xl font-black mt-4 text-amber-400">
+          {promotions}
+        </h3>
+      </div>
+
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Sem estoque</span>
+        <h3 className="text-5xl font-black mt-4 text-red-400">
+          {outOfStock}
+        </h3>
+      </div>
+
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <span className="text-zinc-400">Conversão manual</span>
+        <h3 className="text-3xl font-black mt-4 text-zinc-300">
+          WhatsApp
+        </h3>
+      </div>
+    </div>
+
+    <div className="grid lg:grid-cols-2 gap-6">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <h3 className="text-2xl font-black mb-6">
+          Pedidos por status
+        </h3>
+
+        <div className="space-y-4">
+          {["Novo", "Em preparo", "Saiu para entrega", "Finalizado"].map(
+            (status) => {
+              const count = savedOrders.filter(
+                (order) => order.status === status
+              ).length
+
+              return (
+                <div
+                  key={status}
+                  className="flex items-center justify-between border-b border-zinc-800 pb-3"
+                >
+                  <span className="text-zinc-300">{status}</span>
+
+                  <strong className="text-amber-400 text-xl">
+                    {count}
+                  </strong>
+                </div>
+              )
+            }
+          )}
+        </div>
+      </div>
+
+      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        <h3 className="text-2xl font-black mb-6">
+          Resumo operacional
+        </h3>
+
+        <div className="space-y-4 text-zinc-300">
+          <p>
+            📦 Produtos disponíveis:{" "}
+            <strong className="text-white">{activeProducts}</strong>
+          </p>
+
+          <p>
+            ⚠️ Produtos sem estoque:{" "}
+            <strong className="text-red-400">{outOfStock}</strong>
+          </p>
+
+          <p>
+            🔥 Promoções ativas:{" "}
+            <strong className="text-amber-400">{promotions}</strong>
+          </p>
+
+          <p>
+            🛒 Pedidos registrados:{" "}
+            <strong className="text-blue-400">{savedOrders.length}</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
         {(activeTab === "Produtos" || activeTab === "Promoções") && (
           <div className="grid lg:grid-cols-[400px,1fr] gap-8">
