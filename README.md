@@ -1,144 +1,110 @@
 # 🍷 Adega Nat AI
 
-Sistema Full Stack em desenvolvimento para adegas e delivery de bebidas com catálogo digital, painel administrativo, controle de pedidos e integração automática com WhatsApp.
+Sistema SaaS Full Stack para adegas e deliverys de bebidas com catálogo digital, painel administrativo, autenticação JWT e pedidos integrados via WhatsApp.
 
 ---
 
-# 🚀 Sobre o Projeto
+# 🚀 Deploy
 
-O **Adega Nat AI** foi criado para modernizar o atendimento de adegas, oferecendo uma experiência digital prática, rápida e intuitiva para clientes e administradores.
+🔗 Frontend:
+https://adega-nat-ai.vercel.app/
 
-O sistema permite que clientes:
+🔗 Backend API:
+https://adeganatai.onrender.com/
 
-* Naveguem pelo catálogo
-* Visualizem promoções
-* Adicionem produtos ao carrinho
-* Finalizem pedidos via WhatsApp
-* Consultem localização e horário de funcionamento
+---
 
-Além disso, o projeto conta com um painel administrativo completo para gerenciamento da operação.
+# 🖥️ Demonstração
+<img width="1883" height="912" alt="image" src="https://github.com/user-attachments/assets/2a31507c-1ce8-4f1d-80c6-665ac5a8591c" />
+
+<img width="1829" height="853" alt="image" src="https://github.com/user-attachments/assets/25ff2406-bfbf-4277-abab-dab0f2e1185f" />
+
+
+
+
+https://github.com/LuuckySilva/AdegaNatAI
 
 ---
 
 # ✨ Funcionalidades
 
-## 👤 Área do Cliente
-
-✅ Catálogo digital responsivo
-✅ Busca de produtos
-✅ Categorias dinâmicas
-✅ Promoções destacadas
-✅ Carrinho lateral interativo
-✅ Checkout inteligente
-✅ Integração automática com WhatsApp
-✅ Número automático de pedidos
-✅ Controle de estoque em tempo real
-✅ Produtos esgotados automaticamente
-✅ Localização integrada ao Google Maps
-✅ Horário de funcionamento dinâmico
-
----
-
-## 🔐 Painel Administrativo
-
-✅ Login administrativo
-✅ Dashboard de visão geral
-✅ Controle de produtos
-✅ Adicionar produtos
-✅ Editar produtos
-✅ Remover produtos
-✅ Ativar/Inativar produtos
+✅ Catálogo digital dinâmico
+✅ Carrinho inteligente
+✅ Integração com WhatsApp
+✅ Painel administrativo
 ✅ Controle de estoque
-✅ Controle de promoções
-✅ Gerenciamento de pedidos
-✅ Atualização de status dos pedidos
-✅ Controle de faturamento mensal
-✅ Controle de pedidos mensais
+✅ CRUD completo
+✅ Upload de imagens
+✅ Login JWT
+✅ Banco de dados PostgreSQL
+✅ Deploy Full Stack
 
 ---
 
 # 🛠️ Tecnologias Utilizadas
 
+## Frontend
+
 * React
-* JavaScript
 * Vite
 * Tailwind CSS
-* LocalStorage
-* WhatsApp API (via link dinâmico)
+* JavaScript
+
+## Backend
+
+* Node.js
+* Express
+* JWT Authentication
+* Multer
+
+## Banco de Dados
+
+* PostgreSQL
+* Neon Database
+
+## Deploy
+
+* Vercel
+* Render
 
 ---
 
-# 📊 Estrutura do Projeto
+# 🔐 Painel Administrativo
 
-```bash
-client/
-├── src/
-│   ├── components/
-│   ├── data/
-│   ├── utils/
-│   └── App.jsx
-```
+O sistema possui painel administrativo protegido com autenticação JWT para gerenciamento completo da aplicação.
+
+Funcionalidades do painel:
+
+* Cadastro de produtos
+* Controle de estoque
+* Gestão de pedidos
+* Alteração de status
+* Upload de imagens
+* Categorias dinâmicas
+
+---
+
+# 📦 Estrutura do Projeto
+
+/client → Frontend React
+/server → Backend Node.js
+/uploads → Imagens dos produtos
 
 ---
 
 # 🎯 Objetivo do Projeto
 
-O objetivo do Adega Nat AI é evoluir para um sistema SaaS completo para adegas e distribuidoras, incluindo:
-
-* Backend Node.js
-* Banco de dados
-* Dashboard avançado
-* IA para recomendações
-* Gestão de clientes
-* Analytics de vendas
-* Sistema multiusuário
+O Adega Nat AI foi desenvolvido com foco em praticar arquitetura Full Stack moderna, integração entre frontend e backend, autenticação segura e fluxo comercial real.
 
 ---
 
-# 📌 Roadmap
+# 👨‍💻 Autor
 
-* [x] Catálogo digital
-* [x] Carrinho interativo
-* [x] Integração WhatsApp
-* [x] Painel administrativo
-* [x] Controle de estoque
-* [x] Login admin
-* [x] Dashboard de pedidos
-* [ ] Backend Node.js
-* [ ] Banco de dados
-* [ ] Autenticação JWT
-* [ ] Deploy Full Stack
-* [ ] IA para recomendações
-* [ ] Dashboard avançado
+Lucas Silva
 
----
+🔗 LinkedIn:
+https://www.linkedin.com/in/olucas-silvaa/
 
-# 📷 Preview
-<img width="1892" height="897" alt="image" src="https://github.com/user-attachments/assets/e80b34b3-8a5c-43f5-aea7-c7fa9f0f75bb" />
-
-
-## Cliente
-
-* Catálogo digital moderno
-* Checkout inteligente
-* Integração WhatsApp
-
-## Admin
-
-* Gestão de produtos
-* Controle de pedidos
-* Dashboard operacional
-
----
-
-# 💻 Autor
-
-## Lucas Silva
-
-Desenvolvedor Full Stack em formação com foco em aplicações SaaS, automações e experiência digital.
-
-🔗 LinkedIn
-https://www.linkedin.com/in/olucas-silvaa
-
-🔗 GitHub
+🔗 GitHub:
 https://github.com/LuuckySilva
+
