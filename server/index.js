@@ -3,6 +3,7 @@ const pool = require("./db")
 const uploadRoutes = require("./routes/upload")
 const express = require("express")
 const cors = require("cors")
+const authRoutes = require("./routes/auth")
 
 const productsRoutes = require("./routes/products")
 const ordersRoutes = require("./routes/orders")
@@ -13,6 +14,7 @@ app.use(cors())
 app.use(express.json())
 app.use("/uploads", express.static("uploads"))
 app.use("/upload", uploadRoutes)
+app.use("/auth", authRoutes)
 
 app.get("/", (req, res) => {
   res.json({
