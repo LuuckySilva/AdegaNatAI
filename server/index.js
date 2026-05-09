@@ -1,3 +1,5 @@
+require("dotenv").config()
+const pool = require("./db")
 const uploadRoutes = require("./routes/upload")
 const express = require("express")
 const cors = require("cors")
@@ -20,6 +22,13 @@ app.get("/", (req, res) => {
 
 app.use("/products", productsRoutes)
 app.use("/orders", ordersRoutes)
+pool.connect()
+  .then(() => {
+    console.log("PostgreSQL conectado ✅")
+  })
+  .catch((err) => {
+    console.error("Erro PostgreSQL ❌", err)
+  })
 
 const PORT = 3000
 
