@@ -39,6 +39,33 @@ function AdminPanel({
     setEditingProduct(null)
     setNewCategory("")
   }
+  async function handleImageUpload(event) {
+  const file = event.target.files[0]
+
+  if (!file) return
+
+  const formData = new FormData()
+
+  formData.append("image", file)
+
+  try {
+    const response = await fetch(
+      "http://localhost:3000/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    )
+
+    const data = await response.json()
+
+    setImage(data.imageUrl)
+  } catch (error) {
+    console.error("Erro upload imagem:", error)
+
+    alert("Erro ao enviar imagem.")
+  }
+}
 
   function handleSubmit() {
     if (!name || price === "" || stock === "" || !image) {
@@ -241,13 +268,30 @@ function AdminPanel({
                   className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
                 />
 
-                <input
-                  type="text"
-                  placeholder="Imagem URL"
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
-                />
+                <div className="space-y-4">
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleImageUpload}
+    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+  />
+
+  <input
+    type="text"
+    placeholder="Imagem URL"
+    value={image}
+    onChange={(e) => setImage(e.target.value)}
+    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+  />
+
+  {image && (
+    <img
+      src={image}
+      alt="Preview"
+      className="w-full h-56 object-cover rounded-2xl border border-zinc-800"
+    />
+  )}
+</div>
 
                 <textarea
                   placeholder="Descrição"
