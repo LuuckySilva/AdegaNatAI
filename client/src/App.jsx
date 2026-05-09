@@ -9,8 +9,7 @@ import StoreInfo from "./components/StoreInfo"
 
 const API_URL = "http://localhost:3000"
 
-const ADMIN_USER = "admin"
-const ADMIN_PASSWORD = "nat123"
+
 
 function App() {
   const [products, setProducts] = useState([])
@@ -36,6 +35,15 @@ function App() {
     fetchProducts()
     fetchOrders()
   }, [])
+
+  useEffect(() => {
+  const token = localStorage.getItem("adegaNatToken")
+
+  if (token && window.location.hash === "#admin") {
+    setShowAdmin(true)
+    setShowAdminLogin(false)
+  }
+}, [])
 
   async function fetchProducts() {
     try {
@@ -80,19 +88,40 @@ const filteredProducts = products.filter((product) => {
 
   return matchesCategory && matchesSearch
 })
-  function handleAdminLogin(event) {
-    event.preventDefault()
+  async function handleAdminLogin(event) {
+  event.preventDefault()
 
-    if (adminUser === ADMIN_USER && adminPassword === ADMIN_PASSWORD) {
-      setShowAdmin(true)
-      setShowAdminLogin(false)
-      setAdminUser("")
-      setAdminPassword("")
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: adminUser,
+        password: adminPassword,
+      }),
+    })
+
+    if (!response.ok) {
+      alert("Usuário ou senha incorretos.")
       return
     }
 
-    alert("Usuário ou senha incorretos.")
+    const data = await response.json()
+
+    localStorage.setItem("adegaNatToken", data.token)
+
+    setShowAdmin(true)
+    setShowAdminLogin(false)
+    setAdminUser("")
+    setAdminPassword("")
+  } catch (error) {
+    console.error("Erro login admin:", error)
+    alert("Erro ao fazer login.")
   }
+  
+}
 
   function closeAdminLogin() {
     setShowAdminLogin(false)
@@ -240,7 +269,14 @@ const filteredProducts = products.filter((product) => {
   if (showAdmin) {
     return (
       <AdminPanel
-        setShowAdmin={setShowAdmin}
+        setShowAdmin={(value) => {
+  if (!value) {
+    localStorage.removeItem("adegaNatToken")
+    window.location.hash = ""
+  }
+
+  setShowAdmin(value)
+}}
         products={products}
         addProduct={addProduct}
         updateProduct={updateProduct}
