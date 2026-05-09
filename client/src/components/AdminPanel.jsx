@@ -24,6 +24,7 @@ function AdminPanel({
   const [active, setActive] = useState(true)
   const [isPromotion, setIsPromotion] = useState(false)
   const [promoValidUntil, setPromoValidUntil] = useState("")
+  const [newCategory, setNewCategory] = useState("")
 
   function resetForm() {
     setName("")
@@ -36,6 +37,7 @@ function AdminPanel({
     setIsPromotion(false)
     setPromoValidUntil("")
     setEditingProduct(null)
+    setNewCategory("")
   }
 
   function handleSubmit() {
@@ -47,7 +49,7 @@ function AdminPanel({
     const productData = {
       id: editingProduct?.id || Date.now(),
       name,
-      category,
+      category: newCategory.trim() || category,
       price: Number(price),
       stock: Number(stock),
       image,
@@ -64,6 +66,7 @@ function AdminPanel({
     }
 
     resetForm()
+    setNewCategory("")
   }
 
   function handleEdit(product) {
@@ -91,6 +94,9 @@ function AdminPanel({
   const activeProducts = products.filter((product) => product.active).length
   const promotions = products.filter((product) => product.isPromotion).length
   const outOfStock = products.filter((product) => product.stock <= 0).length
+  const categories = [
+  ...new Set(products.map((product) => product.category)),
+]
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -200,14 +206,24 @@ function AdminPanel({
                 />
 
                 <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
-                >
-                  <option>Promoções</option>
-                  <option>Porções</option>
-                  <option>Outros</option>
-                </select>
+  value={category}
+  onChange={(e) => setCategory(e.target.value)}
+  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+>
+  {categories.map((categoryItem) => (
+    <option key={categoryItem} value={categoryItem}>
+      {categoryItem}
+    </option>
+  ))}
+</select>
+
+<input
+  type="text"
+  placeholder="Nova categoria opcional: Ex: Refrigerantes, Energéticos, Balas..."
+  value={newCategory}
+  onChange={(e) => setNewCategory(e.target.value)}
+  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3"
+/>
 
                 <input
                   type="number"

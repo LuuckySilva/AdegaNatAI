@@ -1,5 +1,46 @@
 [
   {
+    "id": 1778286624344,
+    "number": 4,
+    "customerName": "Lucas",
+    "customerPhone": "35984128081",
+    "address": "Teste1",
+    "paymentMethod": "Pix",
+    "deliveryTax": 0,
+    "notes": "poste amarelo para referencia ",
+    "products": [
+      {
+        "id": 14,
+        "name": "Gin Pink",
+        "category": "Outros",
+        "price": 85,
+        "stock": 5,
+        "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd",
+        "description": "Gin rosé premium importado.",
+        "active": true,
+        "isPromotion": false,
+        "promoValidUntil": "",
+        "quantity": 1
+      },
+      {
+        "id": 15,
+        "name": "Porção Onion Rings",
+        "category": "Porções",
+        "price": 42,
+        "stock": 6,
+        "image": "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5",
+        "description": "Anéis de cebola crocantes.",
+        "active": true,
+        "isPromotion": false,
+        "promoValidUntil": "",
+        "quantity": 3
+      }
+    ],
+    "total": 211,
+    "status": "Novo",
+    "createdAt": "2026-05-09T00:30:24.344Z"
+  },
+  {
     "id": 1778281966533,
     "number": 3,
     "customerName": "narita",

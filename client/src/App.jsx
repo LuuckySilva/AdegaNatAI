@@ -65,17 +65,21 @@ function App() {
     0
   )
 
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory =
-      selectedCategory === "Todos" ? true : product.category === selectedCategory
+  const categories = [
+  "Todos",
+  ...new Set(products.map((product) => product.category)),
+]
 
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+const filteredProducts = products.filter((product) => {
+  const matchesCategory =
+    selectedCategory === "Todos" ? true : product.category === selectedCategory
 
-    return matchesCategory && matchesSearch
-  })
+  const matchesSearch = product.name
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase())
 
+  return matchesCategory && matchesSearch
+})
   function handleAdminLogin(event) {
     event.preventDefault()
 
@@ -326,19 +330,19 @@ function App() {
             </div>
 
             <div className="flex gap-3 overflow-x-auto pb-2">
-              {["Todos", "Promoções", "Porções", "Outros"].map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-5 py-2 rounded-xl border transition whitespace-nowrap ${
-                    selectedCategory === category
-                      ? "bg-amber-500 text-black border-amber-500"
-                      : "bg-zinc-900 border-zinc-800"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+             {categories.map((category) => (
+  <button
+    key={category}
+    onClick={() => setSelectedCategory(category)}
+    className={`px-5 py-2 rounded-xl border transition whitespace-nowrap ${
+      selectedCategory === category
+        ? "bg-amber-500 text-black border-amber-500"
+        : "bg-zinc-900 border-zinc-800"
+    }`}
+  >
+    {category}
+  </button>
+))}
             </div>
           </div>
 
