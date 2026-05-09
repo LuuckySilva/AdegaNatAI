@@ -157,8 +157,9 @@ const filteredProducts = products.filter((product) => {
       const response = await fetch(`${API_URL}/products`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-        },
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("adegaNatToken")}`,
+},
         body: JSON.stringify(newProduct),
       })
 
@@ -175,8 +176,9 @@ const filteredProducts = products.filter((product) => {
       const response = await fetch(`${API_URL}/products/${updatedProduct.id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
-        },
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("adegaNatToken")}`,
+},
         body: JSON.stringify(updatedProduct),
       })
 
@@ -201,6 +203,9 @@ const filteredProducts = products.filter((product) => {
     try {
       await fetch(`${API_URL}/products/${productId}`, {
         method: "DELETE",
+        headers: {
+  Authorization: `Bearer ${localStorage.getItem("adegaNatToken")}`,
+},
       })
 
       setProducts(products.filter((product) => product.id !== productId))
@@ -229,8 +234,9 @@ const filteredProducts = products.filter((product) => {
       const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
-        },
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("adegaNatToken")}`,
+},
         body: JSON.stringify({
           status: newStatus,
         }),
@@ -255,9 +261,12 @@ const filteredProducts = products.filter((product) => {
     if (!confirmDelete) return
 
     try {
-      await fetch(`${API_URL}/orders/${orderId}`, {
-        method: "DELETE",
-      })
+     await fetch(`${API_URL}/orders/${orderId}`, {
+  method: "DELETE",
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("adegaNatToken")}`,
+  },
+})
 
       setSavedOrders(savedOrders.filter((order) => order.id !== orderId))
     } catch (error) {
