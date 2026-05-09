@@ -1,91 +1,177 @@
 const express = require("express")
-const fs = require("fs")
-const path = require("path")
+const pool = require("../db")
 
 const router = express.Router()
 
-const ordersPath = path.join(__dirname, "../data/orders.json")
-const productsPath = path.join(__dirname, "../data/products.json")
+router.get("/", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        id AS number,
+        customer_name AS "customerName",
+        customer_phone AS "customerPhone",
+        address,
+        payment_method AS "paymentMethod",
+        delivery_tax AS "deliveryTax",
+        notes,
+        products,
+        total,
+        status,
+        created_at AS "createdAt"
+      FROM orders
+      ORDER BY id DESC
+    `)
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf-8"))
-}
-
-function saveJson(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
-}
-
-router.get("/", (req, res) => {
-  const orders = readJson(ordersPath)
-  res.json(orders)
-})
-
-router.post("/", (req, res) => {
-  const orders = readJson(ordersPath)
-  const products = readJson(productsPath)
-
-  const orderProducts = req.body.products || []
-
-  const updatedProducts = products.map((product) => {
-    const itemInOrder = orderProducts.find((item) => item.id === product.id)
-
-    if (!itemInOrder) return product
-
-    return {
-      ...product,
-      stock: Math.max(0, product.stock - itemInOrder.quantity),
-    }
-  })
-
-  const newOrder = {
-    id: orders.length + 1,
-    number: orders.length + 1,
-    customerName: req.body.customerName,
-    customerPhone: req.body.customerPhone,
-    address: req.body.address,
-    paymentMethod: req.body.paymentMethod,
-    deliveryTax: Number(req.body.deliveryTax || 0),
-    notes: req.body.notes || "",
-    products: orderProducts,
-    total: Number(req.body.total || 0),
-    status: "Novo",
-    createdAt: new Date().toISOString(),
+    res.json(result.rows)
+  } catch (error) {
+    console.error("Erro ao buscar pedidos:", error)
+    res.status(500).json({
+      message: "Erro ao buscar pedidos.",
+    })
   }
-
-  orders.unshift(newOrder)
-
-  saveJson(productsPath, updatedProducts)
-  saveJson(ordersPath, orders)
-
-  res.status(201).json(newOrder)
 })
 
-router.put("/:id/status", (req, res) => {
-  const orders = readJson(ordersPath)
-  const orderId = Number(req.params.id)
+router.post("/", async (req, res) => {
+  const client = await pool.connect()
 
-  const updatedOrders = orders.map((order) =>
-    order.id === orderId ? { ...order, status: req.body.status } : order
-  )
+  try {
+    await client.query("BEGIN")
 
-  saveJson(ordersPath, updatedOrders)
+    const orderProducts = req.body.products || []
 
-  const updatedOrder = updatedOrders.find((order) => order.id === orderId)
+    for (const item of orderProducts) {
+      await client.query(
+        `
+        UPDATE products
+        SET stock = GREATEST(stock - $1, 0)
+        WHERE id = $2
+        `,
+        [Number(item.quantity), Number(item.id)]
+      )
+    }
 
-  res.json(updatedOrder)
+    const result = await client.query(
+      `
+      INSERT INTO orders
+      (
+        customer_name,
+        customer_phone,
+        address,
+        payment_method,
+        delivery_tax,
+        notes,
+        products,
+        total,
+        status
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'Novo')
+      RETURNING
+        id,
+        id AS number,
+        customer_name AS "customerName",
+        customer_phone AS "customerPhone",
+        address,
+        payment_method AS "paymentMethod",
+        delivery_tax AS "deliveryTax",
+        notes,
+        products,
+        total,
+        status,
+        created_at AS "createdAt"
+      `,
+      [
+        req.body.customerName,
+        req.body.customerPhone,
+        req.body.address,
+        req.body.paymentMethod,
+        Number(req.body.deliveryTax || 0),
+        req.body.notes || "",
+        JSON.stringify(orderProducts),
+        Number(req.body.total || 0),
+      ]
+    )
+
+    await client.query("COMMIT")
+
+    res.status(201).json(result.rows[0])
+  } catch (error) {
+    await client.query("ROLLBACK")
+
+    console.error("Erro ao criar pedido:", error)
+    res.status(500).json({
+      message: "Erro ao criar pedido.",
+    })
+  } finally {
+    client.release()
+  }
 })
 
-router.delete("/:id", (req, res) => {
-  const orders = readJson(ordersPath)
-  const orderId = Number(req.params.id)
+router.put("/:id/status", async (req, res) => {
+  try {
+    const orderId = Number(req.params.id)
 
-  const updatedOrders = orders.filter((order) => order.id !== orderId)
+    const result = await pool.query(
+      `
+      UPDATE orders
+      SET status = $1
+      WHERE id = $2
+      RETURNING
+        id,
+        id AS number,
+        customer_name AS "customerName",
+        customer_phone AS "customerPhone",
+        address,
+        payment_method AS "paymentMethod",
+        delivery_tax AS "deliveryTax",
+        notes,
+        products,
+        total,
+        status,
+        created_at AS "createdAt"
+      `,
+      [req.body.status, orderId]
+    )
 
-  saveJson(ordersPath, updatedOrders)
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Pedido não encontrado.",
+      })
+    }
 
-  res.json({
-    message: "Pedido removido com sucesso.",
-  })
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error("Erro ao atualizar status:", error)
+    res.status(500).json({
+      message: "Erro ao atualizar status.",
+    })
+  }
+})
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const orderId = Number(req.params.id)
+
+    const result = await pool.query(
+      "DELETE FROM orders WHERE id = $1 RETURNING id",
+      [orderId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Pedido não encontrado.",
+      })
+    }
+
+    res.json({
+      message: "Pedido removido com sucesso.",
+    })
+  } catch (error) {
+    console.error("Erro ao remover pedido:", error)
+    res.status(500).json({
+      message: "Erro ao remover pedido.",
+    })
+  }
 })
 
 module.exports = router
