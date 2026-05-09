@@ -1,18 +1,53 @@
-# 🍷 Adega Nat AI
+# AdegaNatAI 🍷
 
-Sistema SaaS Full Stack para adegas e deliverys de bebidas com catálogo digital, painel administrativo, autenticação JWT e pedidos integrados via WhatsApp.
+SaaS Full Stack para adegas e deliveries de bebidas — com painel 
+administrativo, gestão de pedidos em tempo real e integração nativa 
+com WhatsApp.
 
----
+## 🔗 Deploy
 
-# 🚀 Deploy
+- **Frontend:** https://adega-nat-ai.vercel.app/
+- **API:** https://adeganatai.onrender.com/
 
-🔗 Frontend:
-https://adega-nat-ai.vercel.app/
+## ✨ Funcionalidades
 
-🔗 Backend API:
-https://adeganatai.onrender.com/
+- Catálogo digital dinâmico com categorias e upload real de imagens
+- Carrinho inteligente com gestão de pedidos
+- Integração com WhatsApp para confirmação de pedidos
+- Painel administrativo com login seguro (JWT)
+- CRUD completo de produtos + controle de estoque
+- Atualização de status dos pedidos em tempo real
 
----
+## 🛠 Stack
+
+**Frontend:** React · Vite · Tailwind CSS · JavaScript  
+**Backend:** Node.js · Express · JWT Auth · Multer  
+**Banco de dados:** PostgreSQL (Neon Database)  
+**Deploy:** Vercel (frontend) + Render (API)
+
+## 🏗 Arquitetura
+
+/client         → React + Vite
+  /components
+  /pages
+  /utils
+/server         → Node.js + Express
+  /routes       → auth, products, orders, upload
+  /middleware   → autenticação JWT
+  /uploads      → imagens dos produtos
+  db.js         → conexão PostgreSQL (Neon)
+
+## 🚀 Como rodar localmente
+
+# Backend
+cd server
+npm install
+npm start
+
+# Frontend
+cd client
+npm install
+npm run dev
 
 # 🖥️ Demonstração
 <img width="1883" height="912" alt="image" src="https://github.com/user-attachments/assets/2a31507c-1ce8-4f1d-80c6-665ac5a8591c" />
@@ -22,89 +57,5 @@ https://adeganatai.onrender.com/
 
 
 
-https://github.com/LuuckySilva/AdegaNatAI
 
----
-
-# ✨ Funcionalidades
-
-✅ Catálogo digital dinâmico
-✅ Carrinho inteligente
-✅ Integração com WhatsApp
-✅ Painel administrativo
-✅ Controle de estoque
-✅ CRUD completo
-✅ Upload de imagens
-✅ Login JWT
-✅ Banco de dados PostgreSQL
-✅ Deploy Full Stack
-
----
-
-# 🛠️ Tecnologias Utilizadas
-
-## Frontend
-
-* React
-* Vite
-* Tailwind CSS
-* JavaScript
-
-## Backend
-
-* Node.js
-* Express
-* JWT Authentication
-* Multer
-
-## Banco de Dados
-
-* PostgreSQL
-* Neon Database
-
-## Deploy
-
-* Vercel
-* Render
-
----
-
-# 🔐 Painel Administrativo
-
-O sistema possui painel administrativo protegido com autenticação JWT para gerenciamento completo da aplicação.
-
-Funcionalidades do painel:
-
-* Cadastro de produtos
-* Controle de estoque
-* Gestão de pedidos
-* Alteração de status
-* Upload de imagens
-* Categorias dinâmicas
-
----
-
-# 📦 Estrutura do Projeto
-
-/client → Frontend React
-/server → Backend Node.js
-/uploads → Imagens dos produtos
-
----
-
-# 🎯 Objetivo do Projeto
-
-O Adega Nat AI foi desenvolvido com foco em praticar arquitetura Full Stack moderna, integração entre frontend e backend, autenticação segura e fluxo comercial real.
-
----
-
-# 👨‍💻 Autor
-
-Lucas Silva
-
-🔗 LinkedIn:
-https://www.linkedin.com/in/olucas-silvaa/
-
-🔗 GitHub:
-https://github.com/LuuckySilva
 
