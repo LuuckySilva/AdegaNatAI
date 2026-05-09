@@ -1,3 +1,4 @@
+const protectAdmin = require("../middleware/auth")
 const express = require("express")
 const pool = require("../db")
 
@@ -30,7 +31,7 @@ router.get("/", async (req, res) => {
   }
 })
 
-router.post("/", async (req, res) => {
+router.post("/", protectAdmin, async (req, res) => {
   try {
     const {
       name,
@@ -93,7 +94,7 @@ router.post("/", async (req, res) => {
   }
 })
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", protectAdmin, async (req, res) => {
   try {
     const productId = Number(req.params.id)
 
@@ -164,7 +165,7 @@ router.put("/:id", async (req, res) => {
   }
 })
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protectAdmin, async (req, res) => {
   try {
     const productId = Number(req.params.id)
 
