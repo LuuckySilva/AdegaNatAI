@@ -1,98 +1,193 @@
 const express = require("express")
-const fs = require("fs")
-const path = require("path")
+const pool = require("../db")
 
 const router = express.Router()
 
-const productsPath = path.join(__dirname, "../data/products.json")
+router.get("/", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        name,
+        category,
+        price,
+        stock,
+        image,
+        description,
+        active,
+        is_promotion AS "isPromotion",
+        promo_valid_until AS "promoValidUntil"
+      FROM products
+      ORDER BY id ASC
+    `)
 
-function readProducts() {
-  return JSON.parse(fs.readFileSync(productsPath, "utf-8"))
-}
-
-function saveProducts(products) {
-  fs.writeFileSync(productsPath, JSON.stringify(products, null, 2))
-}
-
-router.get("/", (req, res) => {
-  const products = readProducts()
-  res.json(products)
-})
-
-router.post("/", (req, res) => {
-  const products = readProducts()
-
-  const newProduct = {
-    id: Date.now(),
-    name: req.body.name,
-    category: req.body.category,
-    price: Number(req.body.price),
-    stock: Number(req.body.stock),
-    image: req.body.image,
-    description: req.body.description || "",
-    active: req.body.active ?? true,
-    isPromotion: req.body.isPromotion ?? false,
-    promoValidUntil: req.body.promoValidUntil || "",
-  }
-
-  products.push(newProduct)
-  saveProducts(products)
-
-  res.status(201).json(newProduct)
-})
-
-router.put("/:id", (req, res) => {
-  const products = readProducts()
-  const productId = Number(req.params.id)
-
-  const productExists = products.some((product) => product.id === productId)
-
-  if (!productExists) {
-    return res.status(404).json({
-      message: "Produto não encontrado.",
+    res.json(result.rows)
+  } catch (error) {
+    console.error("Erro ao buscar produtos:", error)
+    res.status(500).json({
+      message: "Erro ao buscar produtos.",
     })
   }
-
-  const updatedProducts = products.map((product) =>
-    product.id === productId
-      ? {
-          ...product,
-          ...req.body,
-          id: productId,
-          price: Number(req.body.price ?? product.price),
-          stock: Number(req.body.stock ?? product.stock),
-        }
-      : product
-  )
-
-  saveProducts(updatedProducts)
-
-  const updatedProduct = updatedProducts.find(
-    (product) => product.id === productId
-  )
-
-  res.json(updatedProduct)
 })
 
-router.delete("/:id", (req, res) => {
-  const products = readProducts()
-  const productId = Number(req.params.id)
+router.post("/", async (req, res) => {
+  try {
+    const {
+      name,
+      category,
+      price,
+      stock,
+      image,
+      description,
+      active,
+      isPromotion,
+      promoValidUntil,
+    } = req.body
 
-  const productExists = products.some((product) => product.id === productId)
+    const result = await pool.query(
+      `
+      INSERT INTO products
+      (
+        name,
+        category,
+        price,
+        stock,
+        image,
+        description,
+        active,
+        is_promotion,
+        promo_valid_until
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING
+        id,
+        name,
+        category,
+        price,
+        stock,
+        image,
+        description,
+        active,
+        is_promotion AS "isPromotion",
+        promo_valid_until AS "promoValidUntil"
+      `,
+      [
+        name,
+        category,
+        Number(price),
+        Number(stock),
+        image,
+        description || "",
+        active ?? true,
+        isPromotion ?? false,
+        promoValidUntil || null,
+      ]
+    )
 
-  if (!productExists) {
-    return res.status(404).json({
-      message: "Produto não encontrado.",
+    res.status(201).json(result.rows[0])
+  } catch (error) {
+    console.error("Erro ao criar produto:", error)
+    res.status(500).json({
+      message: "Erro ao criar produto.",
     })
   }
+})
 
-  const updatedProducts = products.filter((product) => product.id !== productId)
+router.put("/:id", async (req, res) => {
+  try {
+    const productId = Number(req.params.id)
 
-  saveProducts(updatedProducts)
+    const {
+      name,
+      category,
+      price,
+      stock,
+      image,
+      description,
+      active,
+      isPromotion,
+      promoValidUntil,
+    } = req.body
 
-  res.json({
-    message: "Produto removido com sucesso.",
-  })
+    const result = await pool.query(
+      `
+      UPDATE products
+      SET
+        name = $1,
+        category = $2,
+        price = $3,
+        stock = $4,
+        image = $5,
+        description = $6,
+        active = $7,
+        is_promotion = $8,
+        promo_valid_until = $9
+      WHERE id = $10
+      RETURNING
+        id,
+        name,
+        category,
+        price,
+        stock,
+        image,
+        description,
+        active,
+        is_promotion AS "isPromotion",
+        promo_valid_until AS "promoValidUntil"
+      `,
+      [
+        name,
+        category,
+        Number(price),
+        Number(stock),
+        image,
+        description || "",
+        active ?? true,
+        isPromotion ?? false,
+        promoValidUntil || null,
+        productId,
+      ]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Produto não encontrado.",
+      })
+    }
+
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error("Erro ao atualizar produto:", error)
+    res.status(500).json({
+      message: "Erro ao atualizar produto.",
+    })
+  }
+})
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const productId = Number(req.params.id)
+
+    const result = await pool.query(
+      "DELETE FROM products WHERE id = $1 RETURNING id",
+      [productId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Produto não encontrado.",
+      })
+    }
+
+    res.json({
+      message: "Produto removido com sucesso.",
+    })
+  } catch (error) {
+    console.error("Erro ao remover produto:", error)
+    res.status(500).json({
+      message: "Erro ao remover produto.",
+    })
+  }
 })
 
 module.exports = router
