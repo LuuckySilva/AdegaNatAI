@@ -8,7 +8,8 @@ function Cart({
   setProducts,
   fetchOrders,
 }) {
-  const API_URL = "http://localhost:3000"
+  const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
 
   const total = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
