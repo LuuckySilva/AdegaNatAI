@@ -1,4 +1,5 @@
-const express = require("express")
+const protectAdmin = require("../middleware/auth")
+
 const pool = require("../db")
 
 const router = express.Router()
@@ -107,7 +108,7 @@ router.post("/", async (req, res) => {
   }
 })
 
-router.put("/:id/status", async (req, res) => {
+router.put("/:id/status", protectAdmin, async (req, res) => {
   try {
     const orderId = Number(req.params.id)
 
@@ -148,7 +149,7 @@ router.put("/:id/status", async (req, res) => {
   }
 })
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protectAdmin, async (req, res) => {
   try {
     const orderId = Number(req.params.id)
 
