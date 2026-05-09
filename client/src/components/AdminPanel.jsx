@@ -461,7 +461,7 @@ function AdminPanel({
                     <p>📞 {order.customerPhone}</p>
                     <p>📍 {order.address}</p>
                     <p>💳 {order.paymentMethod}</p>
-                    <p>🚚 Taxa: R$ {order.deliveryTax || 0}</p>
+                    🚚 Taxa: A verificar
                     <p>📝 {order.notes || "Sem observação"}</p>
                     <p>📅 {order.createdAt}</p>
                   </div>

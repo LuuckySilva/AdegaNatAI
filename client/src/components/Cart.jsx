@@ -150,6 +150,7 @@ R$ ${finalTotal}
 
       setCart([])
       setIsCartOpen(false)
+
       fetchOrders()
     } catch (error) {
       console.error("Erro ao finalizar pedido:", error)

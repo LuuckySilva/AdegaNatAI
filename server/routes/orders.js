@@ -38,7 +38,7 @@ router.post("/", (req, res) => {
   })
 
   const newOrder = {
-    id: Date.now(),
+    id: orders.length + 1,
     number: orders.length + 1,
     customerName: req.body.customerName,
     customerPhone: req.body.customerPhone,
